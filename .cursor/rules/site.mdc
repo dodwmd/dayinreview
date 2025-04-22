@@ -1,0 +1,74 @@
+---
+description: Day in Review - Social Media Content Aggregator
+globs: *,**/*
+alwaysApply: true
+---
+
+# Day in Review - Project Specifications
+
+## Core Concept
+A daily content aggregator that combines popular Reddit links and YouTube videos into personalized playlists for users, eliminating doom scrolling while still keeping users informed on trending content.
+
+## Key Features
+
+### Content Aggregation
+1. Ingest popular links and content from Reddit daily
+2. Identify and extract YouTube videos that are trending
+3. Create curated playlists based on popularity rankings
+4. Update content on a daily basis
+
+### User Management
+1. User registration and authentication system
+2. Personal profile management
+3. Privacy controls - public playlists with private user identities
+4. Subscription management for Reddit channels and YouTube creators
+
+### Playlist Generation
+1. Automatically generate daily playlists for each user
+2. Display top 10 trending videos from subscribed Reddit channels
+3. Append videos from subscribed YouTube channels
+4. Clear separation between trending content and subscription content
+5. Each user receives a unique playlist based on their preferences
+
+### User Interface
+1. Clean, modern, and intuitive design
+2. Easy subscription management
+3. Playlist viewing interface with minimal friction
+4. Mobile-responsive design for on-the-go consumption
+5. One-click access to daily content
+
+## Technical Requirements
+
+### Backend
+1. Reddit API integration for fetching popular posts
+2. YouTube API integration for video data and playlist management
+3. User authentication system
+4. Subscription management database
+5. Scheduled tasks for daily content updates
+
+### Frontend
+1. Responsive, modern UI framework
+2. Playlist display with clear section separation
+3. Easy subscription management interface
+4. Account management controls
+5. YouTube player integration
+
+### Data Privacy
+1. Public playlists without exposing user identity
+2. Secure user data storage
+3. API key management best practices
+4. Compliance with platform terms of service
+
+## Implementation Notes
+1. Prioritize UX to minimize time spent navigating the site
+2. Automate content aggregation to require minimal maintenance
+3. Design for scalability as user base grows
+4. Implement caching to improve performance
+5. Consider rate limits for Reddit and YouTube APIs
+
+## Development Priorities
+1. Core content aggregation functionality
+2. User authentication system
+3. Playlist generation engine
+4. Subscription management
+5. UI refinement and user testing
