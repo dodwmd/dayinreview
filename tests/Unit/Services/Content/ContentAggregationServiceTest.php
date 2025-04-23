@@ -163,8 +163,8 @@ class ContentAggregationServiceTest extends TestCase
     public function test_update_trending_videos(): void
     {
         // Create some YouTube videos with various stats
-        YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+        $youtubeVideo1 = YoutubeVideo::create([
+            'id' => Str::uuid(),
             'youtube_id' => 'trending-video-1',
             'title' => 'Trending Video 1',
             'channel_id' => 'channel-1',
@@ -176,7 +176,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'old-video',
             'title' => 'Old Video',
             'channel_id' => 'channel-2',
@@ -188,7 +188,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'low-views-video',
             'title' => 'Low Views Video',
             'channel_id' => 'channel-3',
@@ -229,7 +229,7 @@ class ContentAggregationServiceTest extends TestCase
     {
         // Create some trending and non-trending videos
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'trending-video-1',
             'title' => 'Trending Video 1',
             'channel_id' => 'channel-1',
@@ -242,7 +242,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'trending-video-2',
             'title' => 'Trending Video 2',
             'channel_id' => 'channel-2',
@@ -255,7 +255,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'non-trending-video',
             'title' => 'Non Trending Video',
             'channel_id' => 'channel-3',
@@ -294,7 +294,7 @@ class ContentAggregationServiceTest extends TestCase
     {
         // Create Reddit posts from different subreddits
         $redditPost1 = RedditPost::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'reddit_id' => 'reddit-post-1',
             'subreddit' => 'videos',
             'title' => 'Test Post 1',
@@ -306,7 +306,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         $redditPost2 = RedditPost::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'reddit_id' => 'reddit-post-2',
             'subreddit' => 'videos',
             'title' => 'Test Post 2',
@@ -318,7 +318,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         $redditPost3 = RedditPost::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'reddit_id' => 'reddit-post-3',
             'subreddit' => 'music',
             'title' => 'Test Post 3',
@@ -331,7 +331,7 @@ class ContentAggregationServiceTest extends TestCase
 
         // Create YouTube videos associated with the Reddit posts
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'youtube-video-1',
             'reddit_post_id' => $redditPost1->id,
             'title' => 'YouTube Video 1',
@@ -342,7 +342,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'youtube-video-2',
             'reddit_post_id' => $redditPost2->id,
             'title' => 'YouTube Video 2',
@@ -353,7 +353,7 @@ class ContentAggregationServiceTest extends TestCase
         ]);
 
         YoutubeVideo::create([
-            'id' => (string) Str::uuid(),
+            'id' => Str::uuid(),
             'youtube_id' => 'youtube-video-3',
             'reddit_post_id' => $redditPost3->id,
             'title' => 'YouTube Video 3',
