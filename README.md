@@ -1,61 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Day in Review
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://github.com/dodwmd/dayinreview/actions/workflows/ci-cd.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD Status"></a>
+<a href="https://github.com/dodwmd/dayinreview/actions/workflows/quality-checks.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/quality-checks.yml/badge.svg" alt="Quality Checks"></a>
+<a href="https://github.com/dodwmd/dayinreview/actions/workflows/tests.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## About Day in Review
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Day in Review is a web application that aggregates popular content from Reddit and YouTube into personalized playlists. The application helps users discover trending videos and content from their favorite subreddits and YouTube channels in one convenient place.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Content Aggregation**: Automatically collects popular videos from Reddit and YouTube.
+- **Personalized Playlists**: Create custom playlists based on your interests.
+- **Trend Detection**: Identifies trending videos based on view and engagement metrics.
+- **Subscription Management**: Follow your favorite subreddits and YouTube channels.
+- **Caching System**: Optimized performance with Redis-based caching.
+- **API Rate Limiting**: Respects API limits for Reddit and YouTube.
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend**: Laravel 12
+- **Frontend**: Inertia.js with Vue 3
+- **Database**: MySQL
+- **Caching**: Redis
+- **Container**: Docker with Laravel Sail
+- **CI/CD**: GitHub Actions
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
 
-## Laravel Sponsors
+- Docker and Docker Compose
+- Composer
+- Node.js and NPM
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Setup Steps
 
-### Premium Partners
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/dodwmd/dayinreview.git
+   cd dayinreview
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+2. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Contributing
+3. Set up environment:
+   ```bash
+   cp .env.example .env
+   ./vendor/bin/sail up -d
+   ./vendor/bin/sail artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Run migrations:
+   ```bash
+   ./vendor/bin/sail artisan migrate
+   ```
 
-## Code of Conduct
+5. Build frontend assets:
+   ```bash
+   npm run dev
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## API Configuration
 
-## Security Vulnerabilities
+### Reddit API
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Create a Reddit App at https://www.reddit.com/prefs/apps
+2. Add the credentials to your `.env` file:
+   ```
+   REDDIT_CLIENT_ID=your_client_id
+   REDDIT_CLIENT_SECRET=your_client_secret
+   REDDIT_USERNAME=your_username
+   REDDIT_PASSWORD=your_password
+   REDDIT_USER_AGENT="web:com.dayinreview:v1.0.0 (by /u/your_username)"
+   ```
+
+### YouTube API
+
+1. Create a project in the Google Developers Console
+2. Enable the YouTube Data API v3
+3. Create API credentials
+4. Add the API key to your `.env` file:
+   ```
+   YOUTUBE_API_KEY=your_api_key
+   ```
+
+## Development
+
+Run the development server:
+```bash
+./vendor/bin/sail up -d
+npm run dev
+```
+
+## Testing
+
+Run the test suite:
+```bash
+./vendor/bin/sail artisan test
+```
+
+Run static analysis:
+```bash
+./vendor/bin/sail composer analyze
+```
+
+Run code style checks:
+```bash
+./vendor/bin/sail composer lint
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The Day in Review application is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
