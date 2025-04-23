@@ -15,13 +15,13 @@ class YouTubeServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set a dummy API key for testing
         Config::set('services.youtube.api_key', 'test-api-key');
-        
+
         // Create a new instance of the YouTubeService
-        $this->youtubeService = new YouTubeService();
-        
+        $this->youtubeService = new YouTubeService;
+
         // Clear cache for tests
         Cache::flush();
     }
@@ -47,25 +47,25 @@ class YouTubeServiceTest extends TestCase
                             'categoryId' => '10', // Music
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT3M33S', // 3 minutes and 33 seconds
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'false',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '1292000123',
                             'likeCount' => '15200321',
-                            'commentCount' => '899321'
-                        ]
-                    ]
-                ]
-            ], 200)
+                            'commentCount' => '899321',
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -101,22 +101,22 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel 1',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/thumb1.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/thumb1.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT2M30S',
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'false',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '1000',
                             'likeCount' => '100',
-                            'commentCount' => '50'
-                        ]
+                            'commentCount' => '50',
+                        ],
                     ],
                     [
                         'id' => 'video2',
@@ -128,25 +128,25 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel 2',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/thumb2.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/thumb2.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT5M',
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'true',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '2000',
                             'likeCount' => '200',
-                            'commentCount' => '100'
-                        ]
-                    ]
-                ]
-            ], 200)
+                            'commentCount' => '100',
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -173,7 +173,7 @@ class YouTubeServiceTest extends TestCase
                     [
                         'id' => [
                             'kind' => 'youtube#video',
-                            'videoId' => 'search1'
+                            'videoId' => 'search1',
                         ],
                         'snippet' => [
                             'title' => 'Search Result 1',
@@ -183,12 +183,12 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel 3',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/search1.jpg'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'url' => 'https://example.com/search1.jpg',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ], 200),
             'googleapis.com/youtube/v3/videos*' => Http::response([
                 'items' => [
@@ -202,25 +202,25 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel 3',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/search1.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/search1.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT3M',
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'false',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '3000',
                             'likeCount' => '300',
-                            'commentCount' => '150'
-                        ]
-                    ]
-                ]
-            ], 200)
+                            'commentCount' => '150',
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -252,24 +252,24 @@ class YouTubeServiceTest extends TestCase
                             'publishedAt' => '2009-03-07T00:00:00Z',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/channel.jpg'
-                                ]
+                                    'url' => 'https://example.com/channel.jpg',
+                                ],
                             ],
-                            'country' => 'GB'
+                            'country' => 'GB',
                         ],
                         'contentDetails' => [
                             'relatedPlaylists' => [
-                                'uploads' => 'UUuAXFkgsw1L7xaCfnd5JJOw'
-                            ]
+                                'uploads' => 'UUuAXFkgsw1L7xaCfnd5JJOw',
+                            ],
                         ],
                         'statistics' => [
                             'subscriberCount' => '4000000',
                             'videoCount' => '100',
-                            'viewCount' => '2500000000'
-                        ]
-                    ]
-                ]
-            ], 200)
+                            'viewCount' => '2500000000',
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -299,47 +299,47 @@ class YouTubeServiceTest extends TestCase
                         'id' => 'channel1',
                         'contentDetails' => [
                             'relatedPlaylists' => [
-                                'uploads' => 'uploads_playlist_1'
-                            ]
+                                'uploads' => 'uploads_playlist_1',
+                            ],
                         ],
                         'snippet' => [
                             'title' => 'Test Channel',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/channel.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/channel.jpg',
+                                ],
+                            ],
                         ],
                         'statistics' => [
                             'subscriberCount' => '1000000',
                             'videoCount' => '200',
-                            'viewCount' => '5000000'
-                        ]
-                    ]
-                ]
+                            'viewCount' => '5000000',
+                        ],
+                    ],
+                ],
             ], 200),
-            
+
             // Second request to get playlist items
             'googleapis.com/youtube/v3/playlistItems*' => Http::response([
                 'items' => [
                     [
                         'snippet' => [
                             'resourceId' => [
-                                'videoId' => 'channel_video_1'
-                            ]
-                        ]
+                                'videoId' => 'channel_video_1',
+                            ],
+                        ],
                     ],
                     [
                         'snippet' => [
                             'resourceId' => [
-                                'videoId' => 'channel_video_2'
-                            ]
-                        ]
-                    ]
+                                'videoId' => 'channel_video_2',
+                            ],
+                        ],
+                    ],
                 ],
-                'nextPageToken' => 'next_page_token_123'
+                'nextPageToken' => 'next_page_token_123',
             ], 200),
-            
+
             // Third request to get video details
             'googleapis.com/youtube/v3/videos*' => Http::response([
                 'items' => [
@@ -353,22 +353,22 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/video1.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/video1.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT10M',
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'false',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '50000',
                             'likeCount' => '5000',
-                            'commentCount' => '1000'
-                        ]
+                            'commentCount' => '1000',
+                        ],
                     ],
                     [
                         'id' => 'channel_video_2',
@@ -380,25 +380,25 @@ class YouTubeServiceTest extends TestCase
                             'channelTitle' => 'Test Channel',
                             'thumbnails' => [
                                 'high' => [
-                                    'url' => 'https://example.com/video2.jpg'
-                                ]
-                            ]
+                                    'url' => 'https://example.com/video2.jpg',
+                                ],
+                            ],
                         ],
                         'contentDetails' => [
                             'duration' => 'PT8M30S',
                             'dimension' => '2d',
                             'definition' => 'hd',
                             'caption' => 'true',
-                            'licensedContent' => true
+                            'licensedContent' => true,
                         ],
                         'statistics' => [
                             'viewCount' => '40000',
                             'likeCount' => '4000',
-                            'commentCount' => '800'
-                        ]
-                    ]
-                ]
-            ], 200)
+                            'commentCount' => '800',
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -423,14 +423,14 @@ class YouTubeServiceTest extends TestCase
     {
         // Remove API key
         Config::set('services.youtube.api_key', null);
-        
+
         // Create service with HTTP fake to prevent real API calls
         Http::fake();
-        $service = new YouTubeService();
-        
+        $service = new YouTubeService;
+
         // The service should return an error array instead of throwing an exception
         $result = $service->getVideoDetails('some-video-id');
-        
+
         // Assert that we got an error message about the API key
         $this->assertIsArray($result);
         $this->assertArrayHasKey('error', $result);
@@ -444,7 +444,7 @@ class YouTubeServiceTest extends TestCase
     {
         // Mock a failed API response
         Http::fake([
-            'googleapis.com/youtube/v3/videos*' => Http::response('', 500)
+            'googleapis.com/youtube/v3/videos*' => Http::response('', 500),
         ]);
 
         // Call the service method

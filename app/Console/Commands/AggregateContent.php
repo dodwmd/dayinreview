@@ -28,8 +28,6 @@ class AggregateContent extends Command
 
     /**
      * The content aggregation service.
-     *
-     * @var ContentAggregationService
      */
     protected ContentAggregationService $contentService;
 
@@ -53,11 +51,11 @@ class AggregateContent extends Command
         $updateTrending = $this->option('trending');
 
         $this->info("Starting content aggregation (timeframe: {$timeframe}, limit: {$limit})");
-        
-        if (!empty($subreddits)) {
-            $this->info("Targeting specific subreddits: " . implode(', ', $subreddits));
+
+        if (! empty($subreddits)) {
+            $this->info('Targeting specific subreddits: '.implode(', ', $subreddits));
         } else {
-            $this->info("Aggregating from r/popular");
+            $this->info('Aggregating from r/popular');
         }
 
         try {
@@ -73,8 +71,8 @@ class AggregateContent extends Command
             $this->info("Saved {$stats['saved_youtube_videos']} YouTube videos");
 
             // Check for errors
-            if (!empty($stats['errors'])) {
-                $this->error("Encountered errors during aggregation:");
+            if (! empty($stats['errors'])) {
+                $this->error('Encountered errors during aggregation:');
                 foreach ($stats['errors'] as $error) {
                     $this->error("- {$error}");
                 }
@@ -82,7 +80,7 @@ class AggregateContent extends Command
 
             // Update trending videos if requested
             if ($updateTrending) {
-                $this->info("Updating trending videos...");
+                $this->info('Updating trending videos...');
                 $trendingCount = $this->contentService->updateTrendingVideos();
                 $this->info("Marked {$trendingCount} videos as trending");
             }
@@ -94,7 +92,7 @@ class AggregateContent extends Command
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return Command::FAILURE;
         }
     }

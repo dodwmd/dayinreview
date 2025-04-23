@@ -11,22 +11,16 @@ class YouTubeService
 {
     /**
      * The base URL for YouTube Data API v3.
-     *
-     * @var string
      */
     protected string $baseUrl = 'https://www.googleapis.com/youtube/v3';
 
     /**
      * YouTube API key.
-     *
-     * @var string|null
      */
     protected ?string $apiKey = null;
 
     /**
      * Cache TTL in seconds (default: 1 hour).
-     *
-     * @var int
      */
     protected int $cacheTtl = 3600;
 
@@ -36,6 +30,7 @@ class YouTubeService
      * Different operations cost different quota units.
      */
     protected int $maxRequestsPerDay = 10000;
+
     protected string $rateLimitKey = 'youtube_api_rate_limit';
 
     /**
@@ -58,13 +53,12 @@ class YouTubeService
     /**
      * Get video details by video ID.
      *
-     * @param string $videoId The YouTube video ID
-     * @param bool $includeContentDetails Whether to include content details (duration, etc.)
-     * @return array
+     * @param  string  $videoId  The YouTube video ID
+     * @param  bool  $includeContentDetails  Whether to include content details (duration, etc.)
      */
     public function getVideoDetails(string $videoId, bool $includeContentDetails = true): array
     {
-        $cacheKey = "youtube_video_{$videoId}" . ($includeContentDetails ? '_full' : '_basic');
+        $cacheKey = "youtube_video_{$videoId}".($includeContentDetails ? '_full' : '_basic');
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($videoId, $includeContentDetails) {
             try {
@@ -85,7 +79,7 @@ class YouTubeService
                     if (isset($data['items'][0])) {
                         return $this->formatVideoData($data['items'][0]);
                     }
-                    
+
                     return ['error' => 'Video not found'];
                 }
 
@@ -94,14 +88,14 @@ class YouTubeService
                     'message' => $response->body(),
                 ]);
 
-                return ['error' => 'API request failed: ' . $response->status()];
+                return ['error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('YouTube API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['error' => 'Exception: ' . $e->getMessage()];
+                return ['error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
@@ -109,8 +103,7 @@ class YouTubeService
     /**
      * Get multiple videos by their IDs.
      *
-     * @param array $videoIds Array of YouTube video IDs
-     * @return array
+     * @param  array  $videoIds  Array of YouTube video IDs
      */
     public function getVideosById(array $videoIds): array
     {
@@ -119,7 +112,7 @@ class YouTubeService
         $allVideos = [];
 
         foreach ($videoIdsChunks as $chunk) {
-            $cacheKey = 'youtube_videos_' . md5(implode(',', $chunk));
+            $cacheKey = 'youtube_videos_'.md5(implode(',', $chunk));
 
             $videos = Cache::remember($cacheKey, $this->cacheTtl, function () use ($chunk) {
                 try {
@@ -166,14 +159,13 @@ class YouTubeService
     /**
      * Search for videos on YouTube.
      *
-     * @param string $query The search query
-     * @param int $maxResults Maximum number of results to return
-     * @param string $order The order of results (date, rating, relevance, title, viewCount)
-     * @return array
+     * @param  string  $query  The search query
+     * @param  int  $maxResults  Maximum number of results to return
+     * @param  string  $order  The order of results (date, rating, relevance, title, viewCount)
      */
     public function searchVideos(string $query, int $maxResults = 10, string $order = 'relevance'): array
     {
-        $cacheKey = "youtube_search_" . md5($query . '_' . $maxResults . '_' . $order);
+        $cacheKey = 'youtube_search_'.md5($query.'_'.$maxResults.'_'.$order);
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($query, $maxResults, $order) {
             try {
@@ -196,7 +188,7 @@ class YouTubeService
                     foreach ($data['items'] ?? [] as $item) {
                         if (isset($item['id']['videoId'])) {
                             $videoIds[] = $item['id']['videoId'];
-                            
+
                             // Add basic info from search results
                             $results[$item['id']['videoId']] = [
                                 'id' => $item['id']['videoId'],
@@ -211,9 +203,9 @@ class YouTubeService
                     }
 
                     // Get detailed info for all videos in a single request
-                    if (!empty($videoIds)) {
+                    if (! empty($videoIds)) {
                         $videoDetails = $this->getVideosById($videoIds);
-                        
+
                         // Merge detailed info back into results
                         foreach ($videoDetails as $video) {
                             if (isset($results[$video['id']])) {
@@ -245,8 +237,7 @@ class YouTubeService
     /**
      * Get channel information by channel ID.
      *
-     * @param string $channelId The YouTube channel ID
-     * @return array
+     * @param  string  $channelId  The YouTube channel ID
      */
     public function getChannelInfo(string $channelId): array
     {
@@ -266,7 +257,7 @@ class YouTubeService
                     if (isset($data['items'][0])) {
                         return $this->formatChannelData($data['items'][0]);
                     }
-                    
+
                     return ['error' => 'Channel not found'];
                 }
 
@@ -275,14 +266,14 @@ class YouTubeService
                     'message' => $response->body(),
                 ]);
 
-                return ['error' => 'API request failed: ' . $response->status()];
+                return ['error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('YouTube API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['error' => 'Exception: ' . $e->getMessage()];
+                return ['error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
@@ -290,14 +281,13 @@ class YouTubeService
     /**
      * Get videos from a channel.
      *
-     * @param string $channelId The YouTube channel ID
-     * @param int $maxResults Maximum number of results to return
-     * @param string|null $pageToken Page token for pagination
-     * @return array
+     * @param  string  $channelId  The YouTube channel ID
+     * @param  int  $maxResults  Maximum number of results to return
+     * @param  string|null  $pageToken  Page token for pagination
      */
     public function getChannelVideos(string $channelId, int $maxResults = 25, ?string $pageToken = null): array
     {
-        $cacheKey = "youtube_channel_videos_{$channelId}_{$maxResults}" . ($pageToken ? "_{$pageToken}" : '');
+        $cacheKey = "youtube_channel_videos_{$channelId}_{$maxResults}".($pageToken ? "_{$pageToken}" : '');
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($channelId, $maxResults, $pageToken) {
             try {
@@ -305,46 +295,46 @@ class YouTubeService
 
                 // First, get the playlist ID for the channel's uploads
                 $channelInfo = $this->getChannelInfo($channelId);
-                
+
                 if (isset($channelInfo['error'])) {
                     return ['videos' => [], 'next_page_token' => null, 'error' => $channelInfo['error']];
                 }
-                
+
                 $uploadsPlaylistId = $channelInfo['uploads_playlist_id'] ?? null;
-                
-                if (!$uploadsPlaylistId) {
+
+                if (! $uploadsPlaylistId) {
                     return ['videos' => [], 'next_page_token' => null, 'error' => 'Uploads playlist not found'];
                 }
-                
+
                 // Then get the videos from the uploads playlist
                 $params = [
                     'part' => 'snippet',
                     'playlistId' => $uploadsPlaylistId,
                     'maxResults' => $maxResults,
                 ];
-                
+
                 if ($pageToken) {
                     $params['pageToken'] = $pageToken;
                 }
-                
+
                 $response = $this->makeRequest()->get('/playlistItems', $params);
 
                 if ($response->successful()) {
                     $data = $response->json();
                     $videoIds = [];
-                    
+
                     foreach ($data['items'] ?? [] as $item) {
                         if (isset($item['snippet']['resourceId']['videoId'])) {
                             $videoIds[] = $item['snippet']['resourceId']['videoId'];
                         }
                     }
-                    
+
                     $videos = [];
-                    
-                    if (!empty($videoIds)) {
+
+                    if (! empty($videoIds)) {
                         $videos = $this->getVideosById($videoIds);
                     }
-                    
+
                     return [
                         'videos' => $videos,
                         'next_page_token' => $data['nextPageToken'] ?? null,
@@ -356,14 +346,14 @@ class YouTubeService
                     'message' => $response->body(),
                 ]);
 
-                return ['videos' => [], 'next_page_token' => null, 'error' => 'API request failed: ' . $response->status()];
+                return ['videos' => [], 'next_page_token' => null, 'error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('YouTube API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['videos' => [], 'next_page_token' => null, 'error' => 'Exception: ' . $e->getMessage()];
+                return ['videos' => [], 'next_page_token' => null, 'error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
@@ -371,10 +361,9 @@ class YouTubeService
     /**
      * Create a playlist on YouTube.
      *
-     * @param string $title The playlist title
-     * @param string $description The playlist description
-     * @param string $privacy The privacy status (public, unlisted, private)
-     * @return array
+     * @param  string  $title  The playlist title
+     * @param  string  $description  The playlist description
+     * @param  string  $privacy  The privacy status (public, unlisted, private)
      */
     public function createPlaylist(string $title, string $description = '', string $privacy = 'private'): array
     {
@@ -385,9 +374,8 @@ class YouTubeService
     /**
      * Add a video to a playlist.
      *
-     * @param string $playlistId The playlist ID
-     * @param string $videoId The video ID
-     * @return array
+     * @param  string  $playlistId  The playlist ID
+     * @param  string  $videoId  The video ID
      */
     public function addVideoToPlaylist(string $playlistId, string $videoId): array
     {
@@ -397,9 +385,6 @@ class YouTubeService
 
     /**
      * Format video data into a consistent structure.
-     *
-     * @param array $item
-     * @return array
      */
     protected function formatVideoData(array $item): array
     {
@@ -433,17 +418,14 @@ class YouTubeService
             'definition' => $contentDetails['definition'] ?? null,
             'caption' => $contentDetails['caption'] === 'true',
             'licensed_content' => $contentDetails['licensedContent'] ?? false,
-            'view_count' => (int)($statistics['viewCount'] ?? 0),
-            'like_count' => (int)($statistics['likeCount'] ?? 0),
-            'comment_count' => (int)($statistics['commentCount'] ?? 0),
+            'view_count' => (int) ($statistics['viewCount'] ?? 0),
+            'like_count' => (int) ($statistics['likeCount'] ?? 0),
+            'comment_count' => (int) ($statistics['commentCount'] ?? 0),
         ];
     }
 
     /**
      * Format channel data into a consistent structure.
-     *
-     * @param array $item
-     * @return array
      */
     protected function formatChannelData(array $item): array
     {
@@ -461,21 +443,19 @@ class YouTubeService
             'thumbnail' => $snippet['thumbnails']['high']['url'] ?? null,
             'country' => $snippet['country'] ?? null,
             'uploads_playlist_id' => $contentDetails['relatedPlaylists']['uploads'] ?? null,
-            'subscriber_count' => (int)($statistics['subscriberCount'] ?? 0),
-            'video_count' => (int)($statistics['videoCount'] ?? 0),
-            'view_count' => (int)($statistics['viewCount'] ?? 0),
+            'subscriber_count' => (int) ($statistics['subscriberCount'] ?? 0),
+            'video_count' => (int) ($statistics['videoCount'] ?? 0),
+            'view_count' => (int) ($statistics['viewCount'] ?? 0),
         ];
     }
 
     /**
      * Create a new HTTP client for YouTube API.
-     *
-     * @return PendingRequest
      */
     protected function makeRequest(): PendingRequest
     {
         // Ensure API key is set
-        if (!$this->apiKey) {
+        if (! $this->apiKey) {
             throw new \Exception('YouTube API key is not configured.');
         }
 
@@ -492,7 +472,7 @@ class YouTubeService
     {
         $rateLimiter = app('redis');
         $currentDate = now()->format('Ymd');
-        $dateKey = $this->rateLimitKey . ':' . $currentDate;
+        $dateKey = $this->rateLimitKey.':'.$currentDate;
 
         // Get current count for today
         $currentCount = (int) $rateLimiter->get($dateKey);
@@ -501,7 +481,7 @@ class YouTubeService
             // Rate limit exceeded
             $resetTime = now()->addDays(1)->startOfDay();
             $resetSeconds = $resetTime->diffInSeconds(now());
-            
+
             Log::warning('YouTube API rate limit exceeded', [
                 'current_count' => $currentCount,
                 'max_requests' => $this->maxRequestsPerDay,

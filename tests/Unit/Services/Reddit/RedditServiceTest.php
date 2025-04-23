@@ -14,10 +14,10 @@ class RedditServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create a new instance of the RedditService
-        $this->redditService = new RedditService();
-        
+        $this->redditService = new RedditService;
+
         // Clear cache for tests
         Cache::flush();
     }
@@ -51,7 +51,7 @@ class RedditServiceTest extends TestCase
                                 'is_video' => false,
                                 'selftext' => 'Test content',
                                 'media' => null,
-                            ]
+                            ],
                         ],
                         [
                             'data' => [
@@ -73,14 +73,14 @@ class RedditServiceTest extends TestCase
                                 'media' => [
                                     'type' => 'youtube.com',
                                     'oembed' => [
-                                        'html' => '<iframe width="600" height="340" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
-                                    ]
+                                        'html' => '<iframe width="600" height="340" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+                                    ],
                                 ],
-                            ]
-                        ]
-                    ]
-                ]
-            ], 200)
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -90,16 +90,16 @@ class RedditServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('data', $result);
         $this->assertArrayHasKey('after', $result);
-        
+
         // Assert we have the correct number of posts
         $this->assertCount(2, $result['data']);
-        
+
         // Assert first post data
         $this->assertEquals('post1', $result['data'][0]['id']);
         $this->assertEquals('Test Post 1', $result['data'][0]['title']);
         $this->assertEquals('test', $result['data'][0]['subreddit']);
         $this->assertFalse($result['data'][0]['has_youtube_video']);
-        
+
         // Assert second post with YouTube video
         $this->assertEquals('post2', $result['data'][1]['id']);
         $this->assertTrue($result['data'][1]['has_youtube_video']);
@@ -135,11 +135,11 @@ class RedditServiceTest extends TestCase
                                 'is_video' => false,
                                 'selftext' => 'Check out this cool repo!',
                                 'media' => null,
-                            ]
-                        ]
-                    ]
-                ]
-            ], 200)
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
         ]);
 
         // Call the service method
@@ -162,7 +162,7 @@ class RedditServiceTest extends TestCase
         $postWithDirectLink = [
             'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         ];
-        
+
         $this->assertTrue($this->redditService->hasYouTubeVideo($postWithDirectLink));
         $this->assertEquals('dQw4w9WgXcQ', $this->redditService->extractYouTubeVideoId($postWithDirectLink));
 
@@ -170,7 +170,7 @@ class RedditServiceTest extends TestCase
         $postWithShortLink = [
             'url' => 'https://youtu.be/dQw4w9WgXcQ',
         ];
-        
+
         $this->assertTrue($this->redditService->hasYouTubeVideo($postWithShortLink));
         $this->assertEquals('dQw4w9WgXcQ', $this->redditService->extractYouTubeVideoId($postWithShortLink));
 
@@ -180,20 +180,20 @@ class RedditServiceTest extends TestCase
             'media' => [
                 'type' => 'youtube.com',
                 'oembed' => [
-                    'html' => '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>'
-                ]
-            ]
+                    'html' => '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>',
+                ],
+            ],
         ];
-        
+
         $this->assertTrue($this->redditService->hasYouTubeVideo($postWithEmbed));
         $this->assertEquals('dQw4w9WgXcQ', $this->redditService->extractYouTubeVideoId($postWithEmbed));
 
         // Test post without YouTube video
         $postWithoutVideo = [
             'url' => 'https://example.com/some-article',
-            'media' => null
+            'media' => null,
         ];
-        
+
         $this->assertFalse($this->redditService->hasYouTubeVideo($postWithoutVideo));
         $this->assertNull($this->redditService->extractYouTubeVideoId($postWithoutVideo));
     }
@@ -205,7 +205,7 @@ class RedditServiceTest extends TestCase
     {
         // Mock a failed API response
         Http::fake([
-            'www.reddit.com/r/popular.json*' => Http::response('', 500)
+            'www.reddit.com/r/popular.json*' => Http::response('', 500),
         ]);
 
         // Call the service method

@@ -17,10 +17,12 @@ class ContentAggregationServiceTest extends TestCase
     use RefreshDatabase;
 
     protected RedditService $mockRedditService;
+
     protected YouTubeService $mockYoutubeService;
+
     protected ContentAggregationService $service;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -35,7 +37,7 @@ class ContentAggregationServiceTest extends TestCase
         );
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
@@ -55,7 +57,7 @@ class ContentAggregationServiceTest extends TestCase
                     $this->makeRedditPost(true, 'youtube-id-1'),
                     $this->makeRedditPost(false),
                     $this->makeRedditPost(true, 'youtube-id-2'),
-                ]
+                ],
             ]);
 
         // Mock YouTube service response for the first video
@@ -76,7 +78,7 @@ class ContentAggregationServiceTest extends TestCase
         // Verify database has the expected records
         $this->assertDatabaseCount('reddit_posts', 3);
         $this->assertDatabaseCount('youtube_videos', 2);
-        
+
         // Check the returned statistics
         $this->assertEquals(3, $stats['processed_posts']);
         $this->assertEquals(3, $stats['saved_reddit_posts']);
@@ -90,7 +92,7 @@ class ContentAggregationServiceTest extends TestCase
     {
         // List of subreddits to test
         $subreddits = ['videos', 'music'];
-        
+
         // Set up mock expectations for each subreddit
         foreach ($subreddits as $subreddit) {
             $this->mockRedditService->shouldReceive('getSubredditPosts')
@@ -100,9 +102,9 @@ class ContentAggregationServiceTest extends TestCase
                     'data' => [
                         $this->makeRedditPost(true, "youtube-{$subreddit}-1", $subreddit),
                         $this->makeRedditPost(false, null, $subreddit),
-                    ]
+                    ],
                 ]);
-                
+
             // Mock YouTube service for the video in this subreddit
             $this->mockYoutubeService->shouldReceive('getVideoDetails')
                 ->once()
@@ -116,12 +118,12 @@ class ContentAggregationServiceTest extends TestCase
         // Verify database has the expected records
         $this->assertDatabaseCount('reddit_posts', 4); // 2 posts per subreddit
         $this->assertDatabaseCount('youtube_videos', 2); // 1 video per subreddit
-        
+
         // Check the returned statistics
         $this->assertEquals(4, $stats['processed_posts']);
         $this->assertEquals(4, $stats['saved_reddit_posts']);
         $this->assertEquals(2, $stats['saved_youtube_videos']);
-        
+
         // Check subreddit-specific stats
         foreach ($subreddits as $subreddit) {
             $this->assertEquals(2, $stats['subreddit_stats'][$subreddit]['processed']);
@@ -147,7 +149,7 @@ class ContentAggregationServiceTest extends TestCase
         // Verify no database records were created
         $this->assertDatabaseCount('reddit_posts', 0);
         $this->assertDatabaseCount('youtube_videos', 0);
-        
+
         // Check that the error was recorded in stats
         $this->assertEquals(0, $stats['processed_posts']);
         $this->assertEquals(0, $stats['saved_reddit_posts']);
@@ -172,7 +174,7 @@ class ContentAggregationServiceTest extends TestCase
             'published_at' => now()->subDays(2), // Recent
             'is_trending' => false,
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'old-video',
@@ -184,7 +186,7 @@ class ContentAggregationServiceTest extends TestCase
             'published_at' => now()->subDays(10), // Too old
             'is_trending' => false,
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'low-views-video',
@@ -202,18 +204,18 @@ class ContentAggregationServiceTest extends TestCase
 
         // Only the first video should be marked as trending
         $this->assertEquals(1, $updatedCount);
-        
+
         // Verify the trending status in the database
         $this->assertDatabaseHas('youtube_videos', [
             'youtube_id' => 'trending-video-1',
             'is_trending' => true,
         ]);
-        
+
         $this->assertDatabaseHas('youtube_videos', [
             'youtube_id' => 'old-video',
             'is_trending' => false,
         ]);
-        
+
         $this->assertDatabaseHas('youtube_videos', [
             'youtube_id' => 'low-views-video',
             'is_trending' => false,
@@ -238,7 +240,7 @@ class ContentAggregationServiceTest extends TestCase
             'published_at' => now()->subDays(1),
             'is_trending' => true,
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'trending-video-2',
@@ -251,7 +253,7 @@ class ContentAggregationServiceTest extends TestCase
             'published_at' => now()->subDays(2),
             'is_trending' => true,
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'non-trending-video',
@@ -268,17 +270,17 @@ class ContentAggregationServiceTest extends TestCase
         // Test getting all trending videos
         $trendingVideos = $this->service->getTrendingVideos();
         $this->assertCount(2, $trendingVideos);
-        
+
         // Test filtering by channel
         $channelVideos = $this->service->getTrendingVideos(20, ['channel-1']);
         $this->assertCount(1, $channelVideos);
         $this->assertEquals('trending-video-1', $channelVideos[0]['youtube_id']);
-        
+
         // Test filtering by duration
         $shortVideos = $this->service->getTrendingVideos(20, [], 0, 400);
         $this->assertCount(1, $shortVideos);
         $this->assertEquals('trending-video-1', $shortVideos[0]['youtube_id']);
-        
+
         // Test filtering by minimum duration
         $longVideos = $this->service->getTrendingVideos(20, [], 500);
         $this->assertCount(1, $longVideos);
@@ -302,7 +304,7 @@ class ContentAggregationServiceTest extends TestCase
             'has_youtube_video' => true,
             'posted_at' => now()->subDays(1),
         ]);
-        
+
         $redditPost2 = RedditPost::create([
             'id' => (string) Str::uuid(),
             'reddit_id' => 'reddit-post-2',
@@ -314,7 +316,7 @@ class ContentAggregationServiceTest extends TestCase
             'has_youtube_video' => true,
             'posted_at' => now()->subDays(2),
         ]);
-        
+
         $redditPost3 = RedditPost::create([
             'id' => (string) Str::uuid(),
             'reddit_id' => 'reddit-post-3',
@@ -338,7 +340,7 @@ class ContentAggregationServiceTest extends TestCase
             'view_count' => 10000,
             'published_at' => now()->subDays(1),
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'youtube-video-2',
@@ -349,7 +351,7 @@ class ContentAggregationServiceTest extends TestCase
             'view_count' => 20000,
             'published_at' => now()->subDays(2),
         ]);
-        
+
         YoutubeVideo::create([
             'id' => (string) Str::uuid(),
             'youtube_id' => 'youtube-video-3',
@@ -366,13 +368,13 @@ class ContentAggregationServiceTest extends TestCase
         $this->assertCount(2, $videosSubredditRecent);
         // First item should be the most recent video
         $this->assertEquals('youtube-video-1', $videosSubredditRecent[0]['youtube_id']);
-        
+
         // Test with popularity sorting
         $videosSubredditPopular = $this->service->getVideosFromSubreddit('videos', 20, 'popular');
         $this->assertCount(2, $videosSubredditPopular);
         // First item should be the most popular video
         $this->assertEquals('youtube-video-2', $videosSubredditPopular[0]['youtube_id']);
-        
+
         // Test getting videos from 'music' subreddit
         $musicSubreddit = $this->service->getVideosFromSubreddit('music');
         $this->assertCount(1, $musicSubreddit);
@@ -385,6 +387,7 @@ class ContentAggregationServiceTest extends TestCase
     private function makeRedditPost(bool $hasYoutubeVideo = false, ?string $youtubeId = null, string $subreddit = 'videos'): array
     {
         $id = Str::random(6);
+
         return [
             'id' => $id,
             'subreddit' => $subreddit,

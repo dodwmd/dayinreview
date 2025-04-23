@@ -11,22 +11,16 @@ class RedditService
 {
     /**
      * The base URL for Reddit API.
-     *
-     * @var string
      */
     protected string $baseUrl = 'https://www.reddit.com';
 
     /**
      * The User Agent to use for API requests.
-     *
-     * @var string
      */
     protected string $userAgent = 'Day in Review App/1.0';
 
     /**
      * Cache TTL in seconds (default: 30 minutes).
-     *
-     * @var int
      */
     protected int $cacheTtl = 1800;
 
@@ -34,6 +28,7 @@ class RedditService
      * Rate limit settings.
      */
     protected int $maxRequestsPerMinute = 60;
+
     protected string $rateLimitKey = 'reddit_api_rate_limit';
 
     /**
@@ -62,20 +57,19 @@ class RedditService
     /**
      * Get popular posts from Reddit.
      *
-     * @param string $timeframe The timeframe for popular posts (hour, day, week, month, year, all)
-     * @param int $limit The number of posts to retrieve
-     * @param string|null $after Pagination token
-     * @return array
+     * @param  string  $timeframe  The timeframe for popular posts (hour, day, week, month, year, all)
+     * @param  int  $limit  The number of posts to retrieve
+     * @param  string|null  $after  Pagination token
      */
     public function getPopularPosts(string $timeframe = 'day', int $limit = 25, ?string $after = null): array
     {
-        $cacheKey = "reddit_popular_{$timeframe}_{$limit}" . ($after ? "_{$after}" : '');
+        $cacheKey = "reddit_popular_{$timeframe}_{$limit}".($after ? "_{$after}" : '');
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($timeframe, $limit, $after) {
             try {
                 $this->checkRateLimit();
 
-                $endpoint = "/r/popular.json";
+                $endpoint = '/r/popular.json';
                 $query = [
                     't' => $timeframe,
                     'limit' => $limit,
@@ -96,14 +90,14 @@ class RedditService
                     'message' => $response->body(),
                 ]);
 
-                return ['data' => [], 'after' => null, 'error' => 'API request failed: ' . $response->status()];
+                return ['data' => [], 'after' => null, 'error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('Reddit API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['data' => [], 'after' => null, 'error' => 'Exception: ' . $e->getMessage()];
+                return ['data' => [], 'after' => null, 'error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
@@ -111,12 +105,11 @@ class RedditService
     /**
      * Get posts from a specific subreddit.
      *
-     * @param string $subreddit The subreddit name
-     * @param string $sort The sort method (hot, new, top, rising)
-     * @param string $timeframe The timeframe for top posts (hour, day, week, month, year, all)
-     * @param int $limit The number of posts to retrieve
-     * @param string|null $after Pagination token
-     * @return array
+     * @param  string  $subreddit  The subreddit name
+     * @param  string  $sort  The sort method (hot, new, top, rising)
+     * @param  string  $timeframe  The timeframe for top posts (hour, day, week, month, year, all)
+     * @param  int  $limit  The number of posts to retrieve
+     * @param  string|null  $after  Pagination token
      */
     public function getSubredditPosts(
         string $subreddit,
@@ -125,7 +118,7 @@ class RedditService
         int $limit = 25,
         ?string $after = null
     ): array {
-        $cacheKey = "reddit_sub_{$subreddit}_{$sort}_{$timeframe}_{$limit}" . ($after ? "_{$after}" : '');
+        $cacheKey = "reddit_sub_{$subreddit}_{$sort}_{$timeframe}_{$limit}".($after ? "_{$after}" : '');
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($subreddit, $sort, $timeframe, $limit, $after) {
             try {
@@ -155,14 +148,14 @@ class RedditService
                     'message' => $response->body(),
                 ]);
 
-                return ['data' => [], 'after' => null, 'error' => 'API request failed: ' . $response->status()];
+                return ['data' => [], 'after' => null, 'error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('Reddit API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['data' => [], 'after' => null, 'error' => 'Exception: ' . $e->getMessage()];
+                return ['data' => [], 'after' => null, 'error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
@@ -170,8 +163,7 @@ class RedditService
     /**
      * Get details about a specific Reddit post.
      *
-     * @param string $postId The post ID
-     * @return array
+     * @param  string  $postId  The post ID
      */
     public function getPostDetails(string $postId): array
     {
@@ -196,23 +188,20 @@ class RedditService
                     'message' => $response->body(),
                 ]);
 
-                return ['post' => null, 'comments' => [], 'error' => 'API request failed: ' . $response->status()];
+                return ['post' => null, 'comments' => [], 'error' => 'API request failed: '.$response->status()];
             } catch (\Exception $e) {
                 Log::error('Reddit API exception', [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                return ['post' => null, 'comments' => [], 'error' => 'Exception: ' . $e->getMessage()];
+                return ['post' => null, 'comments' => [], 'error' => 'Exception: '.$e->getMessage()];
             }
         });
     }
 
     /**
      * Check if a post contains a YouTube video.
-     *
-     * @param array $post
-     * @return bool
      */
     public function hasYouTubeVideo(array $post): bool
     {
@@ -236,9 +225,6 @@ class RedditService
 
     /**
      * Extract YouTube video ID from a Reddit post.
-     *
-     * @param array $post
-     * @return string|null
      */
     public function extractYouTubeVideoId(array $post): ?string
     {
@@ -249,13 +235,13 @@ class RedditService
 
         // Check if it has a YouTube embed in the media
         if (isset($post['media']['type']) && $post['media']['type'] === 'youtube.com') {
-            return $post['media']['oembed']['html'] ? 
+            return $post['media']['oembed']['html'] ?
                 $this->getYouTubeIdFromEmbedHtml($post['media']['oembed']['html']) : null;
         }
 
         // Check if it has a YouTube embed in secure_media
         if (isset($post['secure_media']['type']) && $post['secure_media']['type'] === 'youtube.com') {
-            return $post['secure_media']['oembed']['html'] ? 
+            return $post['secure_media']['oembed']['html'] ?
                 $this->getYouTubeIdFromEmbedHtml($post['secure_media']['oembed']['html']) : null;
         }
 
@@ -264,9 +250,6 @@ class RedditService
 
     /**
      * Format the popular posts response.
-     *
-     * @param array $response
-     * @return array
      */
     protected function formatPopularPosts(array $response): array
     {
@@ -275,7 +258,7 @@ class RedditService
 
         foreach ($response['data']['children'] ?? [] as $child) {
             $post = $child['data'] ?? [];
-            
+
             if ($post) {
                 $posts[] = $this->formatPostData($post);
             }
@@ -289,9 +272,6 @@ class RedditService
 
     /**
      * Format the subreddit posts response.
-     *
-     * @param array $response
-     * @return array
      */
     protected function formatSubredditPosts(array $response): array
     {
@@ -301,9 +281,6 @@ class RedditService
 
     /**
      * Format the post details response.
-     *
-     * @param array $response
-     * @return array
      */
     protected function formatPostDetails(array $response): array
     {
@@ -315,7 +292,7 @@ class RedditService
         $comments = [];
 
         foreach ($response[1]['data']['children'] ?? [] as $child) {
-            if (isset($child['data']) && !empty($child['data'])) {
+            if (isset($child['data']) && ! empty($child['data'])) {
                 $comments[] = $this->formatCommentData($child['data']);
             }
         }
@@ -328,9 +305,6 @@ class RedditService
 
     /**
      * Format post data into a consistent structure.
-     *
-     * @param array $post
-     * @return array
      */
     protected function formatPostData(array $post): array
     {
@@ -364,9 +338,6 @@ class RedditService
 
     /**
      * Format comment data into a consistent structure.
-     *
-     * @param array $comment
-     * @return array
      */
     protected function formatCommentData(array $comment): array
     {
@@ -383,9 +354,6 @@ class RedditService
 
     /**
      * Recursively format child comments.
-     *
-     * @param array $data
-     * @return array
      */
     protected function getChildComments(array $data): array
     {
@@ -402,24 +370,17 @@ class RedditService
 
     /**
      * Check if the URL is a YouTube URL.
-     *
-     * @param string $url
-     * @return bool
      */
     protected function isYouTubeUrl(string $url): bool
     {
-        return (
+        return
             str_contains($url, 'youtube.com/watch') ||
             str_contains($url, 'youtu.be/') ||
-            str_contains($url, 'youtube.com/embed/')
-        );
+            str_contains($url, 'youtube.com/embed/');
     }
 
     /**
      * Extract YouTube ID from a URL.
-     *
-     * @param string $url
-     * @return string|null
      */
     protected function getYouTubeIdFromUrl(string $url): ?string
     {
@@ -443,25 +404,21 @@ class RedditService
 
     /**
      * Extract YouTube ID from an embed HTML.
-     *
-     * @param string $html
-     * @return string|null
      */
     protected function getYouTubeIdFromEmbedHtml(string $html): ?string
     {
         if (preg_match('/src="https?:\/\/www\.youtube\.com\/embed\/([^"]+)"/', $html, $matches)) {
             // Remove any extra URL parameters
             $id = explode('?', $matches[1])[0];
+
             return $id;
         }
-        
+
         return null;
     }
 
     /**
      * Create a new HTTP client for Reddit API.
-     *
-     * @return PendingRequest
      */
     protected function makeRequest(): PendingRequest
     {
@@ -479,7 +436,7 @@ class RedditService
     {
         $rateLimiter = app('redis');
         $currentTime = now();
-        $windowKey = $this->rateLimitKey . ':' . $currentTime->format('YmdHi'); // Current minute
+        $windowKey = $this->rateLimitKey.':'.$currentTime->format('YmdHi'); // Current minute
 
         // Get current count for this minute
         $currentCount = (int) $rateLimiter->get($windowKey);
