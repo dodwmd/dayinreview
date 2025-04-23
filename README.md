@@ -2,8 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/dodwmd/dayinreview/actions/workflows/ci-cd.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD Status"></a>
-<a href="https://github.com/dodwmd/dayinreview/actions/workflows/quality-checks.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/quality-checks.yml/badge.svg" alt="Quality Checks"></a>
-<a href="https://github.com/dodwmd/dayinreview/actions/workflows/tests.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+<a href="https://github.com/dodwmd/dayinreview/actions/workflows/terramate.yml"><img src="https://github.com/dodwmd/dayinreview/actions/workflows/terramate.yml/badge.svg" alt="Terramate"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
