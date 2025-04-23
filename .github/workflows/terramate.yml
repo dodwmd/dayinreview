@@ -24,69 +24,65 @@ permissions:
 
 jobs:
   validate:
-    name: Validate
+    name: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Terraform
+      - name: set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
-      - name: Setup Terramate
+      - name: set up Terramate
         uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
 
-      - name: Terramate Validate
+      - name: terramate validate
         run: terramate run -- terraform init && terramate run -- terraform validate
         working-directory: ./terramate
 
-      - name: Terramate Format Check
+      - name: terramate format check
         run: terramate fmt --check
         working-directory: ./terramate
         
-      - name: Terramate List Stacks
-        run: terramate list stacks
-        working-directory: ./terramate
-
   plan:
-    name: Plan
+    name: plan
     needs: validate
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Terraform
+      - name: set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
-      - name: Setup Terramate
+      - name: set up Terramate
         uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
 
-      - name: Setup SOPS
+      - name: set up SOPS
         uses: mozilla/sops-action@v2
         with:
           version: "3.8.1"
 
-      - name: Terramate Plan
+      - name: terramate plan
         id: plan
         run: terramate run -- terraform init && terramate run -- terraform plan -no-color -out=tfplan
         working-directory: ./terramate
         continue-on-error: true
 
-      - name: Post Plan to PR
+      - name: post plan to PR
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
@@ -111,33 +107,33 @@ jobs:
           PLAN_OUTPUT: "${{ steps.plan.outputs.stdout }}"
 
   apply:
-    name: Apply
+    name: apply
     needs: validate
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Terraform
+      - name: set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
-      - name: Setup Terramate
+      - name: set up Terramate
         uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
 
-      - name: Setup SOPS
+      - name: set up SOPS
         uses: mozilla/sops-action@v2
         with:
           version: "3.8.1"
 
-      - name: Terraform Init and Apply
+      - name: terraform init and apply
         run: |
           terramate run -- terraform init
           terramate run -- terraform apply -auto-approve
