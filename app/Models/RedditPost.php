@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \DateTime $posted_at
  * @property \DateTime $created_at
  * @property \DateTime $updated_at
- * 
+ *
  * @method static \Illuminate\Database\Eloquent\Builder where(string $column, string $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder join(string $table, string $first, string $operator = null, string $second = null)
  */
