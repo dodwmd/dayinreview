@@ -46,5 +46,8 @@ resource "github_branch_protection" "main" {
     pull_request_bypassers          = var.bypass_pull_request_users
   }
 
-  push_restrictions = var.bypass_users
+  # Create push restrictions (specify users who can push directly)
+  restrict_pushes {
+    push_allowances = var.bypass_users
+  }
 }
