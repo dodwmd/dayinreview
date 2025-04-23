@@ -1,0 +1,145 @@
+name: Terramate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terramate/**'
+      - '.github/workflows/terramate.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terramate/**'
+      - '.github/workflows/terramate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  repository-projects: write
+  id-token: write
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terramate
+        uses: terramate-io/terramate-action@v1
+        with:
+          version: "0.4.6"
+
+      - name: Terramate Check
+        run: terramate check
+        working-directory: ./terramate
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terramate Format Check
+        run: terramate fmt --check
+        working-directory: ./terramate
+        
+      - name: Terramate List Stacks
+        run: terramate list stacks
+        working-directory: ./terramate
+
+  plan:
+    name: Plan
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terramate
+        uses: terramate-io/terramate-action@v1
+        with:
+          version: "0.4.6"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Setup SOPS
+        uses: mozilla/sops-action@v2
+        with:
+          version: "3.8.1"
+
+      - name: Terramate Plan
+        id: plan
+        run: terramate run -- terraform init && terramate run -- terraform plan -no-color -out=tfplan
+        working-directory: ./terramate
+        continue-on-error: true
+
+      - name: Post Plan to PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Get the plan output
+            const planOutput = process.env.PLAN_OUTPUT;
+            
+            // Post comment to PR
+            const comment = `## Terramate Plan Summary 🏗️\n\n\`\`\`terraform\n${planOutput}\n\`\`\``;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        env:
+          PLAN_OUTPUT: "${{ steps.plan.outputs.stdout }}"
+
+  apply:
+    name: Apply
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terramate
+        uses: terramate-io/terramate-action@v1
+        with:
+          version: "0.4.6"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Setup SOPS
+        uses: mozilla/sops-action@v2
+        with:
+          version: "3.8.1"
+
+      - name: Terraform Init and Apply
+        run: |
+          terramate run -- terraform init
+          terramate run -- terraform apply -auto-approve
+        working-directory: ./terramate
+
