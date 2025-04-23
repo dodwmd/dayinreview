@@ -96,6 +96,18 @@ jobs:
           composer require phpstan/phpstan --dev
           composer require brianium/paratest:^7.0 --dev
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
       - name: generate application key
         run: php artisan key:generate
 

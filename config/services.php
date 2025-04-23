@@ -46,4 +46,14 @@ return [
         'max_requests_per_minute' => env('REDDIT_MAX_REQUESTS_PER_MINUTE', 60),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'scopes' => ['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'],
+        'approval_prompt' => 'force',
+        'access_type' => 'offline',
+        'include_granted_scopes' => true,
+    ],
+
 ];

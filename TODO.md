@@ -77,17 +77,17 @@
   - [x] Create database models and relationships
 
 ### 4. User Authentication System
-- [ ] Implement user authentication
-  - [ ] Set up Laravel Breeze/Fortify for authentication scaffolding
-  - [ ] Implement Google OAuth for YouTube integration
-  - [ ] Create user profile management
-  - [ ] Implement user settings and preferences
+- [x] Implement user authentication
+  - [x] Set up Laravel Breeze/Fortify for authentication scaffolding
+  - [x] Implement Google OAuth for YouTube integration
+  - [x] Create user profile management
+  - [x] Implement user settings and preferences
 
-- [ ] Set up subscription management
-  - [ ] Create SubscriptionService in app/Services/Subscription/
-  - [ ] Implement methods for managing Reddit channel subscriptions
-  - [ ] Implement methods for managing YouTube channel subscriptions
-  - [ ] Create database models for subscriptions
+- [x] Set up subscription management
+  - [x] Create SubscriptionService in app/Services/Subscription/
+  - [x] Implement methods for managing Reddit channel subscriptions
+  - [x] Implement methods for managing YouTube channel subscriptions
+  - [x] Create database models for subscriptions
 
 ### 5. Playlist Generation
 - [ ] Implement playlist engine

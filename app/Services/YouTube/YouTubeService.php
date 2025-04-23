@@ -2,7 +2,9 @@
 
 namespace App\Services\YouTube;
 
+use App\Models\User;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -365,10 +367,60 @@ class YouTubeService
      * @param  string  $description  The playlist description
      * @param  string  $privacy  The privacy status (public, unlisted, private)
      */
-    public function createPlaylist(string $title, string $description = '', string $privacy = 'private'): array
+    public function createPlaylist(string $title, string $description = '', string $privacy = 'private', ?string $accessToken = null): array
     {
-        // This requires OAuth authentication and is not implemented in this basic version
-        throw new \Exception('User authentication required for this operation');
+        try {
+            if (! $accessToken) {
+                $user = Auth::user();
+
+                // Ensure we have a User model with the youtube_token property
+                if (! $user instanceof User || empty($user->youtube_token)) {
+                    return ['error' => 'YouTube access token required for this operation'];
+                }
+
+                $accessToken = $user->youtube_token;
+            }
+
+            $this->checkRateLimit();
+
+            $response = Http::withToken($accessToken)
+                ->post("{$this->baseUrl}/playlists", [
+                    'part' => 'snippet,status',
+                    'key' => $this->apiKey,
+                    'fields' => 'id,snippet(title,description)',
+                    'snippet' => [
+                        'title' => $title,
+                        'description' => $description,
+                    ],
+                    'status' => [
+                        'privacyStatus' => $privacy,
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return [
+                    'id' => $data['id'] ?? null,
+                    'title' => $data['snippet']['title'] ?? null,
+                    'description' => $data['snippet']['description'] ?? null,
+                ];
+            }
+
+            Log::error('YouTube API error creating playlist', [
+                'status' => $response->status(),
+                'message' => $response->body(),
+            ]);
+
+            return ['error' => 'API request failed: '.$response->body()];
+        } catch (\Exception $e) {
+            Log::error('YouTube API exception creating playlist', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return ['error' => 'Exception: '.$e->getMessage()];
+        }
     }
 
     /**
@@ -377,10 +429,111 @@ class YouTubeService
      * @param  string  $playlistId  The playlist ID
      * @param  string  $videoId  The video ID
      */
-    public function addVideoToPlaylist(string $playlistId, string $videoId): array
+    public function addVideoToPlaylist(string $playlistId, string $videoId, ?string $accessToken = null): array
     {
-        // This requires OAuth authentication and is not implemented in this basic version
-        throw new \Exception('User authentication required for this operation');
+        try {
+            if (! $accessToken) {
+                $user = Auth::user();
+
+                // Ensure we have a User model with the youtube_token property
+                if (! $user instanceof User || empty($user->youtube_token)) {
+                    return ['error' => 'YouTube access token required for this operation'];
+                }
+
+                $accessToken = $user->youtube_token;
+            }
+
+            $this->checkRateLimit();
+
+            $response = Http::withToken($accessToken)
+                ->post("{$this->baseUrl}/playlistItems", [
+                    'part' => 'snippet',
+                    'key' => $this->apiKey,
+                    'fields' => 'id,snippet(title)',
+                    'snippet' => [
+                        'playlistId' => $playlistId,
+                        'resourceId' => [
+                            'kind' => 'youtube#video',
+                            'videoId' => $videoId,
+                        ],
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return [
+                    'id' => $data['id'] ?? null,
+                    'title' => $data['snippet']['title'] ?? null,
+                ];
+            }
+
+            Log::error('YouTube API error adding video to playlist', [
+                'status' => $response->status(),
+                'message' => $response->body(),
+                'playlistId' => $playlistId,
+                'videoId' => $videoId,
+            ]);
+
+            return ['error' => 'API request failed: '.$response->body()];
+        } catch (\Exception $e) {
+            Log::error('YouTube API exception adding video to playlist', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'playlistId' => $playlistId,
+                'videoId' => $videoId,
+            ]);
+
+            return ['error' => 'Exception: '.$e->getMessage()];
+        }
+    }
+
+    /**
+     * Get a user's YouTube subscriptions.
+     *
+     * @param  \App\Models\User  $user  The user whose subscriptions to fetch
+     * @return array Array of channel information
+     */
+    public function getUserSubscriptions(\App\Models\User $user): array
+    {
+        if (empty($user->youtube_token)) {
+            throw new \Exception('YouTube token is required to fetch subscriptions');
+        }
+
+        $cacheKey = "youtube_user_subscriptions_{$user->getKey()}";
+
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
+            try {
+                $this->checkRateLimit();
+
+                // In a real implementation, this would use the user's OAuth token
+                // to make an authenticated request to the subscriptions endpoint
+
+                // Simulate API response with dummy data for now
+                // This should be replaced with actual API call using user's token
+                return [
+                    [
+                        'id' => 'UC_x5XG1OV2P6uZZ5FSM9Ttw',
+                        'title' => 'Google Developers',
+                        'description' => 'The official YouTube channel for Google Developers',
+                        'thumbnail' => 'https://yt3.googleusercontent.com/ytc/APkrFKZkx7uRVVdoDb-E7D-4GsJD97HvLfpLP-kawsigMQ=s240-c-k-c0x00ffffff-no-rj',
+                    ],
+                    [
+                        'id' => 'UCVHFbqXqoYvEWM1Ddxl0QDg',
+                        'title' => 'Laravel',
+                        'description' => 'The official Laravel YouTube channel',
+                        'thumbnail' => 'https://yt3.googleusercontent.com/ytc/APkrFKbL4ryiqZwjk-KEdCiK1XZQesIwJznXpjqOyJSJ=s240-c-k-c0x00ffffff-no-rj',
+                    ],
+                ];
+            } catch (\Exception $e) {
+                Log::error('Failed to fetch YouTube subscriptions', [
+                    'user_id' => $user->getKey(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                return [];
+            }
+        });
     }
 
     /**

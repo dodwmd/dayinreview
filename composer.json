@@ -9,11 +9,15 @@
         "php": "^8.2",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.20",
+        "laravel/tinker": "^2.10.1",
+        "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
         "brianium/paratest": "^7.0",
         "fakerphp/faker": "^1.23",
+        "laravel/breeze": "^2.3",
         "laravel/dusk": "^8.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.22",
