@@ -17,9 +17,17 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: laravel_test
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpassword
+          # Grant privileges to create multiple test databases for parallel testing
+          MYSQL_ROOT_HOST: '%'
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
       
       redis:
         image: redis:alpine
@@ -59,10 +67,19 @@ jobs:
       - name: install composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: install Laravel Pint & PHPStan
+      - name: install Laravel Pint, PHPStan & ParaTest
         run: |
           composer require laravel/pint --dev
           composer require phpstan/phpstan --dev
+          composer require brianium/paratest:^7.0 --dev
+
+      # Grant MySQL permissions for parallel testing
+      - name: grant MySQL permissions for parallel testing
+        run: |
+          mysql -h127.0.0.1 -uroot -ppassword -e "
+          GRANT ALL PRIVILEGES ON \`laravel_test%\`.* TO 'root'@'%';
+          FLUSH PRIVILEGES;
+          "
 
       - name: generate application key
         run: php artisan key:generate
@@ -80,6 +97,13 @@ jobs:
 
       - name: run tests
         run: php artisan test --parallel
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: laravel_test
+          DB_USERNAME: root
+          DB_PASSWORD: password
 
   build_deploy:
     name: build and deploy
