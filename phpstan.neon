@@ -9,7 +9,6 @@ parameters:
         - vendor
         - node_modules
         - bootstrap/cache
-    checkMissingIterableValueType: false
     ignoreErrors:
-        - '#Unsafe usage of new static\(\)#'
+        - '#Undefined variable: \$this#'
     tmpDir: ./storage/framework/cache/phpstan

@@ -37,7 +37,7 @@ class TestRedisRateLimit extends Command
         RateLimiter::clear($key);
 
         // Number of attempts to make
-        $attemptCount = $this->option('attempts');
+        $attemptCount = (int) $this->option('attempts');
 
         $this->info("Rate limit: {$maxAttempts} attempts per {$decaySeconds} seconds");
         $this->info("Making {$attemptCount} attempts...");
@@ -58,7 +58,7 @@ class TestRedisRateLimit extends Command
             }
 
             // Small delay between attempts
-            if ($i < $attemptCount) {
+            if ($i < (int) $attemptCount) {
                 usleep(500000); // 0.5 seconds
             }
         }

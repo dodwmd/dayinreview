@@ -232,14 +232,15 @@ class ContentAggregationService
     {
         try {
             // Check if the post already exists
+            /** @var RedditPost|null $existingPost */
             $existingPost = RedditPost::where('reddit_id', $postData['id'])->first();
 
             if ($existingPost) {
                 // Update the existing post with new data
                 $existingPost->update([
-                    'score' => $postData['score'],
-                    'num_comments' => $postData['num_comments'],
-                    'has_youtube_video' => $postData['has_youtube_video'],
+                    'score' => (int) $postData['score'],
+                    'num_comments' => (int) $postData['num_comments'],
+                    'has_youtube_video' => (bool) $postData['has_youtube_video'],
                 ]);
 
                 return $existingPost;
@@ -259,9 +260,9 @@ class ContentAggregationService
             $post->author = $postData['author'];
             $post->permalink = $postData['permalink'];
             $post->url = $postData['url'];
-            $post->score = $postData['score'];
-            $post->num_comments = $postData['num_comments'];
-            $post->has_youtube_video = $postData['has_youtube_video'];
+            $post->score = (int) $postData['score'];
+            $post->num_comments = (int) $postData['num_comments'];
+            $post->has_youtube_video = (bool) $postData['has_youtube_video'];
             $post->posted_at = $postedAt;
             $post->save();
 
@@ -288,6 +289,7 @@ class ContentAggregationService
     {
         try {
             // Check if the video already exists
+            /** @var YoutubeVideo|null $existingVideo */
             $existingVideo = YoutubeVideo::where('youtube_id', $youtubeId)->first();
 
             if ($existingVideo) {
@@ -326,9 +328,9 @@ class ContentAggregationService
             $video->channel_id = $videoDetails['channel_id'];
             $video->channel_title = $videoDetails['channel_title'];
             $video->thumbnail_url = $videoDetails['thumbnail'];
-            $video->duration_seconds = $videoDetails['duration_seconds'] ?? null;
-            $video->view_count = $videoDetails['view_count'] ?? 0;
-            $video->like_count = $videoDetails['like_count'] ?? 0;
+            $video->duration_seconds = (int) ($videoDetails['duration_seconds'] ?? 0);
+            $video->view_count = (int) ($videoDetails['view_count'] ?? 0);
+            $video->like_count = (int) ($videoDetails['like_count'] ?? 0);
             $video->is_trending = false; // Set based on criteria, e.g., high view count
             $video->published_at = $publishedAt;
             $video->save();
@@ -364,7 +366,7 @@ class ContentAggregationService
                 ->where('published_at', '>=', $dateThreshold)
                 ->where('view_count', '>=', $viewThreshold)
                 ->where('like_count', '>=', $likeThreshold)
-                ->where('is_trending', false)
+                ->where('is_trending', '=', false)
                 ->update(['is_trending' => true]);
 
             return $count;
@@ -390,7 +392,7 @@ class ContentAggregationService
     public function getTrendingVideos(int $limit = 20, array $channelIds = [], int $minDuration = 0, int $maxDuration = 0): array
     {
         try {
-            $query = YoutubeVideo::where('is_trending', true)
+            $query = YoutubeVideo::where('is_trending', '=', true)
                 ->orderBy('published_at', 'desc');
 
             // Apply filters

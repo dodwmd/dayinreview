@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $id
+ * @property string $reddit_id
+ * @property string $subreddit
+ * @property string $title
+ * @property string|null $content
+ * @property string $author
+ * @property string $permalink
+ * @property string $url
+ * @property int $score
+ * @property int $num_comments
+ * @property bool $has_youtube_video
+ * @property \DateTime $posted_at
+ * @property \DateTime $created_at
+ * @property \DateTime $updated_at
+ * 
+ * @method static \Illuminate\Database\Eloquent\Builder where(string $column, string $operator = null, mixed $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder join(string $table, string $first, string $operator = null, string $second = null)
+ */
 class RedditPost extends Model
 {
     use HasFactory;
