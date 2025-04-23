@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -31,7 +32,11 @@ return new class extends Migration
             $table->index('subreddit');
             $table->index('has_youtube_video');
             $table->index('posted_at');
-            $table->fulltext(['title', 'content']);
+            
+            // Only add fulltext indexes if not using SQLite (for testing compatibility)
+            if (DB::connection()->getDriverName() !== 'sqlite') {
+                $table->fulltext(['title', 'content']);
+            }
         });
 
         // Create YouTube videos table
@@ -43,7 +48,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('channel_id');
             $table->string('channel_title');
-            $table->string('thumbnail_url');
+            $table->string('thumbnail_url')->nullable();
             $table->integer('duration_seconds')->nullable();
             $table->integer('view_count')->default(0);
             $table->integer('like_count')->default(0);
@@ -56,7 +61,11 @@ return new class extends Migration
             $table->index('channel_id');
             $table->index('is_trending');
             $table->index('published_at');
-            $table->fulltext(['title', 'description']);
+            
+            // Only add fulltext indexes if not using SQLite (for testing compatibility)
+            if (DB::connection()->getDriverName() !== 'sqlite') {
+                $table->fulltext(['title', 'description']);
+            }
         });
     }
 
