@@ -45,12 +45,6 @@ resource "github_branch_protection" "main" {
     require_code_owner_reviews      = var.require_code_owner_reviews
     pull_request_bypassers          = var.bypass_pull_request_users
   }
-}
 
-resource "github_branch_protection_bypass_push_access" "bypass" {
-  count          = var.enable_branch_protection && length(var.bypass_users) > 0 ? 1 : 0
-  repository     = github_repository.this.name
-  branch         = var.protected_branch
-  users          = var.bypass_users
-  teams          = var.bypass_teams
+  push_restrictions = var.bypass_users
 }
