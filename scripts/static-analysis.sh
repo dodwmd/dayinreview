@@ -20,7 +20,19 @@ if [ ! -f ./phpstan.neon ]; then
     checkMissingIterableValueType: false" > ./phpstan.neon
 fi
 
-# Run PHPStan
-./vendor/bin/sail php ./vendor/bin/phpstan analyse --no-progress
+# Check if running in CI environment
+if [ -n "$CI" ]; then
+    # In CI, run PHPStan directly without Sail
+    ./vendor/bin/phpstan analyse --no-progress
+else
+    # Make sure Sail is running for local environment
+    if ! ./vendor/bin/sail ps | grep -q 'laravel'; then
+        echo "Sail is not running."
+        echo "You may start Sail using the following commands: './vendor/bin/sail up' or './vendor/bin/sail up -d'"
+        exit 1
+    fi
+    # In local environment, run through Sail
+    ./vendor/bin/sail php ./vendor/bin/phpstan analyse --no-progress
+fi
 
 echo "✅ Static analysis completed!"
