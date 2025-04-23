@@ -71,11 +71,6 @@ jobs:
         with:
           version: "0.4.6"
 
-      - name: set up SOPS
-        uses: mozilla/sops-action@v2
-        with:
-          version: "3.8.1"
-
       - name: terramate plan
         id: plan
         run: terramate run -- terraform init && terramate run -- terraform plan -no-color -out=tfplan
@@ -127,11 +122,6 @@ jobs:
         uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
-
-      - name: set up SOPS
-        uses: mozilla/sops-action@v2
-        with:
-          version: "3.8.1"
 
       - name: terraform init and apply
         run: |
