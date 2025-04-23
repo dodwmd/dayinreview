@@ -2,12 +2,9 @@
 
 namespace Tests\Unit\Services\Content;
 
-use App\Models\RedditPost;
-use App\Models\YoutubeVideo;
 use App\Services\Content\ContentAggregationService;
 use App\Services\Reddit\RedditService;
 use App\Services\YouTube\YouTubeService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Mockery;

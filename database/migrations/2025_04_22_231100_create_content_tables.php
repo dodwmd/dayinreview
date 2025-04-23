@@ -32,7 +32,7 @@ return new class extends Migration
             $table->index('subreddit');
             $table->index('has_youtube_video');
             $table->index('posted_at');
-            
+
             // Only add fulltext indexes if not using SQLite (for testing compatibility)
             if (DB::connection()->getDriverName() !== 'sqlite') {
                 $table->fulltext(['title', 'content']);
@@ -61,7 +61,7 @@ return new class extends Migration
             $table->index('channel_id');
             $table->index('is_trending');
             $table->index('published_at');
-            
+
             // Only add fulltext indexes if not using SQLite (for testing compatibility)
             if (DB::connection()->getDriverName() !== 'sqlite') {
                 $table->fulltext(['title', 'description']);

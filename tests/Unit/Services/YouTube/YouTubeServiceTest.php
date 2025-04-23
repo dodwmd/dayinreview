@@ -136,7 +136,7 @@ class YouTubeServiceTest extends TestCase
                 ],
             ],
         ];
-        
+
         // Mock the HTTP response for the YouTube API
         Http::fake([
             'googleapis.com/youtube/v3/videos*' => Http::response($response, 200),
@@ -222,7 +222,7 @@ class YouTubeServiceTest extends TestCase
 
         // Assert the basic response structure
         $this->assertIsArray($result);
-        
+
         // Check if the result contains videos
         if (isset($result['videos'])) {
             // If the service returns a structured response with 'videos' key
@@ -237,7 +237,7 @@ class YouTubeServiceTest extends TestCase
             $this->assertEquals('search1', $result[0]['id']);
         }
     }
-    
+
     /**
      * Test getting channel videos.
      */
@@ -332,7 +332,7 @@ class YouTubeServiceTest extends TestCase
                 ],
             ],
         ];
-        
+
         // Mock the HTTP response
         Http::fake([
             'googleapis.com/youtube/v3/playlistItems*' => Http::response($playlistResponse, 200),
@@ -421,7 +421,7 @@ class YouTubeServiceTest extends TestCase
 
         // Call a method that requires the API key, expect an error array
         $result = $this->youtubeService->getVideoDetails('dQw4w9WgXcQ');
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('error', $result);
         $this->assertStringContainsString('API key is not configured', $result['error']);

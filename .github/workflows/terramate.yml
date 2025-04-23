@@ -29,17 +29,17 @@ jobs:
     steps:
       # Checkout code
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # Setup Terramate and Terraform
       - name: Setup Terramate
-        uses: terramate-io/terramate-action@fc933e025b68e3d27510bee5b1d9a15c3866aaf6 # v1.2.3
+        uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
@@ -59,17 +59,17 @@ jobs:
     steps:
       # Checkout code
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # Setup Terramate and Terraform
       - name: Setup Terramate
-        uses: terramate-io/terramate-action@fc933e025b68e3d27510bee5b1d9a15c3866aaf6 # v1.2.3
+        uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
@@ -81,7 +81,7 @@ jobs:
 
       # Comment PR
       - name: Add comment to PR
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -114,19 +114,19 @@ jobs:
     steps:
       # Checkout the triggered branch
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.ref }}
 
       # Setup Terraform
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
 
       # Setup Terramate
       - name: Setup Terramate
-        uses: terramate-io/terramate-action@fc933e025b68e3d27510bee5b1d9a15c3866aaf6 # v1.2.3
+        uses: terramate-io/terramate-action@v1
         with:
           version: "0.4.6"
 

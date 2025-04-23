@@ -128,8 +128,8 @@ class RedditServiceTest extends TestCase
                                 'num_comments' => 10,
                                 'created_utc' => now()->subDay()->timestamp,
                                 'author' => 'testuser',
-                                'subreddit' => 'test'
-                            ]
+                                'subreddit' => 'test',
+                            ],
                         ],
                         [
                             'data' => [
@@ -141,13 +141,13 @@ class RedditServiceTest extends TestCase
                                 'num_comments' => 20,
                                 'created_utc' => now()->subDays(2)->timestamp,
                                 'author' => 'testuser',
-                                'subreddit' => 'test'
-                            ]
-                        ]
+                                'subreddit' => 'test',
+                            ],
+                        ],
                     ],
-                    'after' => 'next_page_token'
-                ]
-            ], 200)
+                    'after' => 'next_page_token',
+                ],
+            ], 200),
         ]);
 
         // Get posts from the "test" subreddit
@@ -155,7 +155,7 @@ class RedditServiceTest extends TestCase
 
         // Assertions - handle different response structures
         $this->assertIsArray($result);
-        
+
         // If the response has a 'data' key, it's formatted one way
         if (isset($result['data'])) {
             $this->assertArrayHasKey('data', $result);
@@ -223,16 +223,16 @@ class RedditServiceTest extends TestCase
         // Mock HTTP response for API error
         Http::fake([
             'oauth.reddit.com/*' => Http::response([
-                'error' => 'Unauthorized'
-            ], 401)
+                'error' => 'Unauthorized',
+            ], 401),
         ]);
 
         // Test error handling for getPopularPosts
         $result = $this->redditService->getPopularPosts();
-        
+
         // Check that we get some kind of error response
         $this->assertIsArray($result);
-        
+
         // The error might be in different formats depending on the implementation
         if (isset($result['error'])) {
             $this->assertArrayHasKey('error', $result);
@@ -248,10 +248,10 @@ class RedditServiceTest extends TestCase
 
         // Test error handling for getSubredditPosts
         $result = $this->redditService->getSubredditPosts('test');
-        
+
         // Check that we get some kind of error response
         $this->assertIsArray($result);
-        
+
         // The error might be in different formats depending on the implementation
         if (isset($result['error'])) {
             $this->assertArrayHasKey('error', $result);
