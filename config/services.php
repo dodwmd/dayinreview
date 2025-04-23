@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'reddit' => [
+        'base_url' => env('REDDIT_API_BASE_URL', 'https://www.reddit.com'),
+        'client_id' => env('REDDIT_CLIENT_ID'),
+        'client_secret' => env('REDDIT_CLIENT_SECRET'),
+        'username' => env('REDDIT_USERNAME'),
+        'password' => env('REDDIT_PASSWORD'),
+        'user_agent' => env('REDDIT_USER_AGENT', 'Day in Review App/1.0'),
+        'cache_ttl' => env('REDDIT_CACHE_TTL', 1800),
+        'max_requests_per_minute' => env('REDDIT_MAX_REQUESTS_PER_MINUTE', 60),
+    ],
+
 ];
