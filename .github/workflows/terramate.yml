@@ -32,6 +32,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
       - name: Setup Terramate
         uses: terramate-io/terramate-action@v1
         with:
@@ -40,11 +45,6 @@ jobs:
       - name: Terramate Validate
         run: terramate run -- terraform validate
         working-directory: ./terramate
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.7.0"
 
       - name: Terramate Format Check
         run: terramate fmt --check
