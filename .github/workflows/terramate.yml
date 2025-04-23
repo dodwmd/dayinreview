@@ -43,7 +43,7 @@ jobs:
           version: "0.4.6"
 
       - name: Terramate Validate
-        run: terramate run -- terraform validate
+        run: terramate run -- terraform init && terramate run -- terraform validate
         working-directory: ./terramate
 
       - name: Terramate Format Check
