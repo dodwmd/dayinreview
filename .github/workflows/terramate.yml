@@ -37,8 +37,8 @@ jobs:
         with:
           version: "0.4.6"
 
-      - name: Terramate Check
-        run: terramate check
+      - name: Terramate Validate
+        run: terramate run -- terraform validate
         working-directory: ./terramate
 
       - name: Set up Terraform
@@ -142,4 +142,3 @@ jobs:
           terramate run -- terraform init
           terramate run -- terraform apply -auto-approve
         working-directory: ./terramate
-
