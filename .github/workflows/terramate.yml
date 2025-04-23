@@ -65,15 +65,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Terramate
-        uses: terramate-io/terramate-action@v1
-        with:
-          version: "0.4.6"
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
+
+      - name: Setup Terramate
+        uses: terramate-io/terramate-action@v1
+        with:
+          version: "0.4.6"
 
       - name: Setup SOPS
         uses: mozilla/sops-action@v2
@@ -122,15 +122,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Terramate
-        uses: terramate-io/terramate-action@v1
-        with:
-          version: "0.4.6"
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.0"
+
+      - name: Setup Terramate
+        uses: terramate-io/terramate-action@v1
+        with:
+          version: "0.4.6"
 
       - name: Setup SOPS
         uses: mozilla/sops-action@v2
