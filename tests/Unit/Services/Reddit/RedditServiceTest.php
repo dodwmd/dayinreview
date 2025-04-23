@@ -222,47 +222,42 @@ class RedditServiceTest extends TestCase
     {
         // Mock HTTP response for API error
         Http::fake([
-            'oauth.reddit.com/*' => Http::response([
-                'error' => 'Unauthorized',
-            ], 401),
+            'oauth.reddit.com/*' => Http::response(
+                ['message' => 'Unauthorized', 'error' => 401],
+                401
+            ),
+            'www.reddit.com/*' => Http::response(
+                ['message' => 'Unauthorized', 'error' => 401],
+                401
+            ),
         ]);
 
         // Test error handling for getPopularPosts
         $result = $this->redditService->getPopularPosts();
 
-        // Check that we get some kind of error response
+        // Check that we get the expected error response structure
         $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('after', $result);
+        $this->assertArrayHasKey('error', $result);
 
-        // The error might be in different formats depending on the implementation
-        if (isset($result['error'])) {
-            $this->assertArrayHasKey('error', $result);
-        } elseif (isset($result['success'])) {
-            $this->assertFalse($result['success']);
-        } else {
-            // If we get here, the result structure is unexpected, but at least
-            // we're not throwing an exception. We'll mark the test as incomplete.
-            $this->markTestIncomplete(
-                'The RedditService error handling returns an unexpected structure.'
-            );
-        }
+        // Check the content of the error response
+        $this->assertEquals([], $result['data']);
+        $this->assertNull($result['after']);
+        $this->assertStringContainsString('API request failed', $result['error']);
 
         // Test error handling for getSubredditPosts
         $result = $this->redditService->getSubredditPosts('test');
 
-        // Check that we get some kind of error response
+        // Check that we get the expected error response structure
         $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('after', $result);
+        $this->assertArrayHasKey('error', $result);
 
-        // The error might be in different formats depending on the implementation
-        if (isset($result['error'])) {
-            $this->assertArrayHasKey('error', $result);
-        } elseif (isset($result['success'])) {
-            $this->assertFalse($result['success']);
-        } else {
-            // If we get here, the result structure is unexpected, but at least
-            // we're not throwing an exception. We'll mark the test as incomplete.
-            $this->markTestIncomplete(
-                'The RedditService error handling returns an unexpected structure.'
-            );
-        }
+        // Check the content of the error response
+        $this->assertEquals([], $result['data']);
+        $this->assertNull($result['after']);
+        $this->assertStringContainsString('API request failed', $result['error']);
     }
 }
