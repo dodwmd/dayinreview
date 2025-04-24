@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Playlist;
+use App\Models\PlaylistItem;
+use App\Models\YoutubeVideo;
 use App\Services\Playlist\PlaylistService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,18 @@ class PlaylistController extends Controller
         $playlists = $this->playlistService->getUserPlaylists($user);
 
         return Inertia::render('Playlists/Index', [
-            'playlists' => $playlists,
+            'playlists' => $playlists->map(function ($playlist) {
+                return [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'date' => $playlist->last_generated_at,
+                    'is_public' => $playlist->visibility === 'public',
+                    'thumbnail_url' => $playlist->thumbnail_url,
+                    'video_count' => $playlist->videos->count(),
+                    'created_at' => $playlist->created_at,
+                    'updated_at' => $playlist->updated_at,
+                ];
+            }),
             'youtubeConnected' => ! empty($user->youtube_token),
         ]);
     }
@@ -62,8 +75,50 @@ class PlaylistController extends Controller
                 ->with('error', 'Playlist not found.');
         }
 
+        // Format playlist data for the frontend
+        $formattedPlaylist = [
+            'id' => $playlist->id,
+            'name' => $playlist->name,
+            'description' => $playlist->description,
+            'thumbnail_url' => $playlist->thumbnail_url,
+            'date' => $playlist->last_generated_at,
+            'is_public' => $playlist->visibility === 'public',
+            'view_count' => $playlist->view_count,
+            'created_at' => $playlist->created_at,
+            'updated_at' => $playlist->updated_at,
+            'videos' => (function () use ($playlist) {
+                /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\PlaylistItem> $items */
+                $items = $playlist->videos;
+
+                return $items->map(function (PlaylistItem $playlistItem) {
+                    /** @var YoutubeVideo $source */
+                    $source = $playlistItem->source;
+
+                    return [
+                        'id' => $source->id,
+                        'youtube_id' => $source->youtube_id,
+                        'title' => $source->title,
+                        'description' => $source->description,
+                        'thumbnail_url' => $source->thumbnail_url,
+                        'channel_id' => $source->channel_id,
+                        'channel_title' => $source->channel_title,
+                        'duration_seconds' => $source->duration_seconds,
+                        'pivot' => [
+                            'position' => $playlistItem->position,
+                            'watched' => $playlistItem->is_watched,
+                            'source' => $playlistItem->notes === 'Trending' ? 'trending' : 'subscription',
+                        ],
+                    ];
+                })
+                    ->sortBy(function (array $video) {
+                        return $video['pivot']['position'];
+                    })
+                    ->values();
+            })(),
+        ];
+
         return Inertia::render('Playlists/Show', [
-            'playlist' => $playlist,
+            'playlist' => $formattedPlaylist,
             'youtubeConnected' => ! empty($user->youtube_token),
         ]);
     }

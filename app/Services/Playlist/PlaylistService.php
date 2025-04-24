@@ -3,9 +3,11 @@
 namespace App\Services\Playlist;
 
 use App\Models\Playlist;
+use App\Models\PlaylistItem;
 use App\Models\User;
 use App\Models\YoutubeVideo;
 use App\Repositories\ContentRepository;
+use App\Repositories\PlaylistRepository;
 use App\Services\YouTube\YouTubeService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -18,7 +20,8 @@ class PlaylistService
      */
     public function __construct(
         private readonly ContentRepository $contentRepository,
-        private readonly YouTubeService $youTubeService
+        private readonly YouTubeService $youTubeService,
+        private readonly PlaylistRepository $playlistRepository
     ) {}
 
     /**
@@ -34,9 +37,7 @@ class PlaylistService
 
         try {
             // Check if playlist already exists for this date
-            $existingPlaylist = $user->playlists()
-                ->where('date', $date->format('Y-m-d'))
-                ->first();
+            $existingPlaylist = $this->playlistRepository->getUserPlaylistForDate($user, $date);
 
             if ($existingPlaylist) {
                 return $existingPlaylist;
@@ -61,12 +62,19 @@ class PlaylistService
             // Create new playlist
             $playlist = new Playlist;
             $playlist->user_id = $user->getKey();
-            $playlist->date = $date;
-            $playlist->is_public = false; // Default to private
-            $playlist->save();
+            $playlist->name = 'Daily Playlist - '.$date->format('F j, Y');
+            $playlist->description = 'Automatically generated daily playlist with trending and subscription content';
+            $playlist->type = 'auto';
+            $playlist->visibility = 'private';
+            $playlist->is_favorite = false;
+            $playlist->view_count = 0;
+            $playlist->last_generated_at = $date;
 
-            // Associate videos with the playlist
+            // Add videos to the playlist
             $this->addVideosToPlaylist($playlist, $trendingVideos, $subscriptionVideos);
+
+            // Store the playlist
+            $this->playlistRepository->storePlaylist($playlist);
 
             // Sync with YouTube if user has YouTube integration
             if (! empty($user->youtube_token)) {
@@ -148,17 +156,22 @@ class PlaylistService
     protected function addVideosToPlaylist(Playlist $playlist, Collection $trendingVideos, Collection $subscriptionVideos): void
     {
         $position = 1;
+        $now = now();
 
         // Add subscription videos (priority content)
         foreach ($subscriptionVideos as $video) {
             $youtubeVideo = $this->findOrCreateYoutubeVideo($video);
 
             if ($youtubeVideo) {
-                $playlist->videos()->attach($youtubeVideo, [
-                    'position' => $position++,
-                    'watched' => false,
-                    'source' => 'subscription',
-                ]);
+                $playlistItem = new PlaylistItem;
+                $playlistItem->playlist_id = $playlist->id;
+                $playlistItem->source_type = 'youtube_video';
+                $playlistItem->source_id = $youtubeVideo->id;
+                $playlistItem->position = $position++;
+                $playlistItem->is_watched = false;
+                $playlistItem->added_at = $now;
+                $playlistItem->notes = 'From subscriptions';
+                $playlistItem->save();
             }
         }
 
@@ -172,11 +185,15 @@ class PlaylistService
             $youtubeVideo = $this->findOrCreateYoutubeVideo($video);
 
             if ($youtubeVideo) {
-                $playlist->videos()->attach($youtubeVideo, [
-                    'position' => $position++,
-                    'watched' => false,
-                    'source' => 'trending',
-                ]);
+                $playlistItem = new PlaylistItem;
+                $playlistItem->playlist_id = $playlist->id;
+                $playlistItem->source_type = 'youtube_video';
+                $playlistItem->source_id = $youtubeVideo->id;
+                $playlistItem->position = $position++;
+                $playlistItem->is_watched = false;
+                $playlistItem->added_at = $now;
+                $playlistItem->notes = 'Trending';
+                $playlistItem->save();
             }
         }
     }
@@ -230,14 +247,9 @@ class PlaylistService
                 return;
             }
 
-            // If the playlist already has a YouTube ID, it's already synced
-            if (! empty($playlist->youtube_playlist_id)) {
-                return;
-            }
-
             // Create a new YouTube playlist
-            $title = 'Day in Review - '.$playlist->date->format('Y-m-d');
-            $description = 'Generated playlist by Day in Review application';
+            $title = $playlist->name;
+            $description = $playlist->description ?? 'Generated playlist by Day in Review application';
 
             $ytPlaylist = $this->youTubeService->createPlaylist(
                 $title,
@@ -248,18 +260,25 @@ class PlaylistService
 
             if (! empty($ytPlaylist['id'])) {
                 // Save the YouTube playlist ID
-                $playlist->youtube_playlist_id = $ytPlaylist['id'];
+                $playlist->thumbnail_url = $ytPlaylist['thumbnail'] ?? null;
                 $playlist->save();
 
                 // Add videos to the YouTube playlist
-                $playlistVideos = $playlist->videos;
+                $playlistItems = $playlist->items()
+                    ->where('source_type', 'youtube_video')
+                    ->orderBy('position')
+                    ->get();
 
-                foreach ($playlistVideos as $video) {
-                    $this->youTubeService->addVideoToPlaylist(
-                        $ytPlaylist['id'],
-                        $video->youtube_id,
-                        $user->youtube_token
-                    );
+                foreach ($playlistItems as $playlistItem) {
+                    // Get the YouTube video
+                    $video = (new YoutubeVideo)->newQuery()->find($playlistItem->source_id);
+                    if ($video) {
+                        $this->youTubeService->addVideoToPlaylist(
+                            $ytPlaylist['id'],
+                            $video->youtube_id,
+                            $user->youtube_token
+                        );
+                    }
                 }
             }
         } catch (\Exception $e) {
@@ -276,11 +295,7 @@ class PlaylistService
      */
     public function getUserPlaylists(User $user, int $limit = 10): Collection
     {
-        return $user->playlists()
-            ->orderBy('date', 'desc')
-            ->limit($limit)
-            ->with('videos')
-            ->get();
+        return $this->playlistRepository->getUserPlaylists($user, $limit);
     }
 
     /**
@@ -288,10 +303,14 @@ class PlaylistService
      */
     public function getPlaylist(User $user, string $playlistId): ?Playlist
     {
-        return $user->playlists()
-            ->where('id', $playlistId)
-            ->with('videos')
-            ->first();
+        $playlist = $this->playlistRepository->getPlaylist($playlistId);
+
+        // Ensure the user owns this playlist
+        if (! $playlist || $playlist->user_id !== $user->getKey()) {
+            return null;
+        }
+
+        return $playlist;
     }
 
     /**
@@ -299,14 +318,14 @@ class PlaylistService
      */
     public function updateVisibility(User $user, string $playlistId, bool $isPublic): ?Playlist
     {
-        $playlist = $user->playlists()->find($playlistId);
+        $playlist = $this->playlistRepository->getPlaylist($playlistId);
 
-        if (! $playlist) {
+        if (! $playlist || $playlist->user_id !== $user->getKey()) {
             return null;
         }
 
-        $playlist->is_public = $isPublic;
-        $playlist->save();
+        $visibility = $isPublic ? 'public' : 'private';
+        $this->playlistRepository->updateVisibility($playlist, $visibility);
 
         return $playlist;
     }
@@ -317,17 +336,13 @@ class PlaylistService
     public function markVideoAsWatched(User $user, string $playlistId, string $videoId): bool
     {
         try {
-            $playlist = $user->playlists()->find($playlistId);
+            $playlist = $this->playlistRepository->getPlaylist($playlistId);
 
-            if (! $playlist) {
+            if (! $playlist || $playlist->user_id !== $user->getKey()) {
                 return false;
             }
 
-            $playlist->videos()
-                ->wherePivot('youtube_video_id', $videoId)
-                ->updateExistingPivot($videoId, ['watched' => true]);
-
-            return true;
+            return $this->playlistRepository->markVideoAsWatched($playlist, $videoId);
         } catch (\Exception $e) {
             Log::error('Failed to mark video as watched', [
                 'playlist_id' => $playlistId,
