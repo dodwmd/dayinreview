@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Playlist;
-use App\Models\PlaylistItem;
 use App\Models\YoutubeVideo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -17,9 +16,9 @@ class PlaylistItemFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<\App\Models\PlaylistItem>
      */
-    protected $model = PlaylistItem::class;
+    protected $model = \App\Models\PlaylistItem::class;
 
     /**
      * Define the model's default state.
@@ -47,8 +46,6 @@ class PlaylistItemFactory extends Factory
 
     /**
      * Set the item as watched.
-     *
-     * @return static
      */
     public function watched(): static
     {
@@ -60,8 +57,6 @@ class PlaylistItemFactory extends Factory
 
     /**
      * Set the item as unwatched.
-     *
-     * @return static
      */
     public function unwatched(): static
     {

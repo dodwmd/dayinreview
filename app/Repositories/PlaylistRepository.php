@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PlaylistRepository
@@ -54,7 +55,7 @@ class PlaylistRepository
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $dateString) {
             return $user->playlists()
-                ->where('last_generated_at', 'like', $dateString . '%')
+                ->where('last_generated_at', 'like', $dateString.'%')
                 ->where('type', 'auto')
                 ->with('videos')
                 ->first();
@@ -72,7 +73,7 @@ class PlaylistRepository
 
             // Clear related cache
             $this->clearUserPlaylistsCache($playlist->user_id);
-            
+
             if ($playlist->last_generated_at) {
                 $dateString = $playlist->last_generated_at->format('Y-m-d');
                 $cacheKey = "playlist:user:{$playlist->user_id}:date:{$dateString}";
@@ -84,7 +85,7 @@ class PlaylistRepository
                 'user_id' => $playlist->user_id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }
@@ -107,7 +108,7 @@ class PlaylistRepository
                 'user_id' => $playlist->user_id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }
@@ -119,21 +120,24 @@ class PlaylistRepository
     {
         try {
             // Find the playlist item for this video
+            /** @var \App\Models\PlaylistItem|null $playlistItem */
             $playlistItem = $playlist->items()
                 ->where('source_type', 'youtube_video')
                 ->where('source_id', $videoId)
                 ->first();
-            
-            if (!$playlistItem) {
+
+            if (! $playlistItem) {
                 return false;
             }
-            
+
             // Mark as watched
-            $playlistItem->markAsWatched();
+            $playlistItem->is_watched = true;
+            $playlistItem->watched_at = now();
+            $playlistItem->save();
 
             // Clear cache for this playlist
             $this->clearPlaylistCache($playlist->getKey());
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to mark video as watched', [
@@ -142,7 +146,7 @@ class PlaylistRepository
                 'user_id' => $playlist->user_id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -155,11 +159,33 @@ class PlaylistRepository
         $cacheKey = "playlists:trending:limit:{$limit}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($limit) {
-            return Playlist::where('visibility', 'public')
+            // First get IDs with raw query
+            $playlistIds = DB::table('playlists')
+                ->select('id')
+                ->where('visibility', 'public')
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
-                ->with(['videos', 'user:id,name'])
-                ->get();
+                ->pluck('id')
+                ->toArray();
+
+            if (empty($playlistIds)) {
+                return collect();
+            }
+
+            // Use a different approach to get playlists with relationships
+            $playlists = collect();
+
+            // Fetch each playlist individually with relationships
+            foreach ($playlistIds as $id) {
+                $playlist = (new Playlist)->newQuery()->find($id);
+                if ($playlist) {
+                    // Load the relationships
+                    $playlist->load(['videos', 'user:id,name']);
+                    $playlists->push($playlist);
+                }
+            }
+
+            return $playlists;
         });
     }
 

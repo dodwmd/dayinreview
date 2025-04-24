@@ -60,19 +60,19 @@ class PlaylistService
             }
 
             // Create new playlist
-            $playlist = new Playlist();
+            $playlist = new Playlist;
             $playlist->user_id = $user->getKey();
-            $playlist->name = 'Daily Playlist - ' . $date->format('F j, Y');
+            $playlist->name = 'Daily Playlist - '.$date->format('F j, Y');
             $playlist->description = 'Automatically generated daily playlist with trending and subscription content';
             $playlist->type = 'auto';
             $playlist->visibility = 'private';
             $playlist->is_favorite = false;
             $playlist->view_count = 0;
             $playlist->last_generated_at = $date;
-            
+
             // Add videos to the playlist
             $this->addVideosToPlaylist($playlist, $trendingVideos, $subscriptionVideos);
-            
+
             // Store the playlist
             $this->playlistRepository->storePlaylist($playlist);
 
@@ -163,7 +163,7 @@ class PlaylistService
             $youtubeVideo = $this->findOrCreateYoutubeVideo($video);
 
             if ($youtubeVideo) {
-                $playlistItem = new PlaylistItem();
+                $playlistItem = new PlaylistItem;
                 $playlistItem->playlist_id = $playlist->id;
                 $playlistItem->source_type = 'youtube_video';
                 $playlistItem->source_id = $youtubeVideo->id;
@@ -185,7 +185,7 @@ class PlaylistService
             $youtubeVideo = $this->findOrCreateYoutubeVideo($video);
 
             if ($youtubeVideo) {
-                $playlistItem = new PlaylistItem();
+                $playlistItem = new PlaylistItem;
                 $playlistItem->playlist_id = $playlist->id;
                 $playlistItem->source_type = 'youtube_video';
                 $playlistItem->source_id = $youtubeVideo->id;
@@ -271,7 +271,7 @@ class PlaylistService
 
                 foreach ($playlistItems as $playlistItem) {
                     // Get the YouTube video
-                    $video = YoutubeVideo::find($playlistItem->source_id);
+                    $video = (new YoutubeVideo)->newQuery()->find($playlistItem->source_id);
                     if ($video) {
                         $this->youTubeService->addVideoToPlaylist(
                             $ytPlaylist['id'],
@@ -304,12 +304,12 @@ class PlaylistService
     public function getPlaylist(User $user, string $playlistId): ?Playlist
     {
         $playlist = $this->playlistRepository->getPlaylist($playlistId);
-        
+
         // Ensure the user owns this playlist
-        if (!$playlist || $playlist->user_id !== $user->getKey()) {
+        if (! $playlist || $playlist->user_id !== $user->getKey()) {
             return null;
         }
-        
+
         return $playlist;
     }
 
@@ -319,14 +319,14 @@ class PlaylistService
     public function updateVisibility(User $user, string $playlistId, bool $isPublic): ?Playlist
     {
         $playlist = $this->playlistRepository->getPlaylist($playlistId);
-        
-        if (!$playlist || $playlist->user_id !== $user->getKey()) {
+
+        if (! $playlist || $playlist->user_id !== $user->getKey()) {
             return null;
         }
-        
+
         $visibility = $isPublic ? 'public' : 'private';
         $this->playlistRepository->updateVisibility($playlist, $visibility);
-        
+
         return $playlist;
     }
 
@@ -337,11 +337,11 @@ class PlaylistService
     {
         try {
             $playlist = $this->playlistRepository->getPlaylist($playlistId);
-            
-            if (!$playlist || $playlist->user_id !== $user->getKey()) {
+
+            if (! $playlist || $playlist->user_id !== $user->getKey()) {
                 return false;
             }
-            
+
             return $this->playlistRepository->markVideoAsWatched($playlist, $videoId);
         } catch (\Exception $e) {
             Log::error('Failed to mark video as watched', [

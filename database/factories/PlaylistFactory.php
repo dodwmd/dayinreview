@@ -16,9 +16,9 @@ class PlaylistFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<\App\Models\Playlist>
      */
-    protected $model = Playlist::class;
+    protected $model = \App\Models\Playlist::class;
 
     /**
      * Define the model's default state.
@@ -47,8 +47,6 @@ class PlaylistFactory extends Factory
 
     /**
      * Create a new private playlist.
-     *
-     * @return static
      */
     public function private(): static
     {
@@ -59,8 +57,6 @@ class PlaylistFactory extends Factory
 
     /**
      * Create a new public playlist.
-     *
-     * @return static
      */
     public function public(): static
     {
@@ -71,8 +67,6 @@ class PlaylistFactory extends Factory
 
     /**
      * Create a new unlisted playlist.
-     *
-     * @return static
      */
     public function unlisted(): static
     {
@@ -83,8 +77,6 @@ class PlaylistFactory extends Factory
 
     /**
      * Create a new auto-generated playlist.
-     *
-     * @return static
      */
     public function auto(): static
     {
@@ -95,8 +87,6 @@ class PlaylistFactory extends Factory
 
     /**
      * Create a new custom playlist.
-     *
-     * @return static
      */
     public function custom(): static
     {

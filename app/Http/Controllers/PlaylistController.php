@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Playlist;
+use App\Models\PlaylistItem;
+use App\Models\YoutubeVideo;
 use App\Services\Playlist\PlaylistService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,23 +86,35 @@ class PlaylistController extends Controller
             'view_count' => $playlist->view_count,
             'created_at' => $playlist->created_at,
             'updated_at' => $playlist->updated_at,
-            'videos' => $playlist->videos->map(function ($video) {
-                return [
-                    'id' => $video->id,
-                    'youtube_id' => $video->youtube_id,
-                    'title' => $video->title,
-                    'description' => $video->description,
-                    'thumbnail_url' => $video->thumbnail_url,
-                    'channel_id' => $video->channel_id,
-                    'channel_title' => $video->channel_title,
-                    'duration_seconds' => $video->duration_seconds,
-                    'pivot' => [
-                        'position' => $video->pivot->position,
-                        'watched' => $video->pivot->is_watched,
-                        'source' => $video->pivot->notes === 'Trending' ? 'trending' : 'subscription',
-                    ],
-                ];
-            })->sortBy('pivot.position')->values(),
+            'videos' => (function () use ($playlist) {
+                /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\PlaylistItem> $items */
+                $items = $playlist->videos;
+
+                return $items->map(function (PlaylistItem $playlistItem) {
+                    /** @var YoutubeVideo $source */
+                    $source = $playlistItem->source;
+
+                    return [
+                        'id' => $source->id,
+                        'youtube_id' => $source->youtube_id,
+                        'title' => $source->title,
+                        'description' => $source->description,
+                        'thumbnail_url' => $source->thumbnail_url,
+                        'channel_id' => $source->channel_id,
+                        'channel_title' => $source->channel_title,
+                        'duration_seconds' => $source->duration_seconds,
+                        'pivot' => [
+                            'position' => $playlistItem->position,
+                            'watched' => $playlistItem->is_watched,
+                            'source' => $playlistItem->notes === 'Trending' ? 'trending' : 'subscription',
+                        ],
+                    ];
+                })
+                    ->sortBy(function (array $video) {
+                        return $video['pivot']['position'];
+                    })
+                    ->values();
+            })(),
         ];
 
         return Inertia::render('Playlists/Show', [

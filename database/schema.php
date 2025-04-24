@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 // Get schema of youtube_videos table
 $youtube_videos_columns = Schema::getColumnListing('youtube_videos');

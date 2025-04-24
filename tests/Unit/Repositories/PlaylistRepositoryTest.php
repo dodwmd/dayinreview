@@ -22,7 +22,7 @@ class PlaylistRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->playlistRepository = new PlaylistRepository();
+        $this->playlistRepository = new PlaylistRepository;
         Cache::flush(); // Clear all cache before each test
     }
 
@@ -33,14 +33,14 @@ class PlaylistRepositoryTest extends TestCase
     {
         // Create user and playlists using factories
         $user = User::factory()->create();
-        
+
         $playlist1 = Playlist::factory()->create([
             'user_id' => $user->id,
             'name' => 'Playlist 1',
             'visibility' => 'private',
             'last_generated_at' => Carbon::today(),
         ]);
-        
+
         $playlist2 = Playlist::factory()->create([
             'user_id' => $user->id,
             'name' => 'Playlist 2',
@@ -68,7 +68,7 @@ class PlaylistRepositoryTest extends TestCase
             'visibility' => 'private',
             'last_generated_at' => Carbon::today(),
         ]);
-        
+
         // Manually clear the cache to simulate what would happen if storePlaylist was used
         Cache::forget($cacheKey);
 
@@ -152,10 +152,10 @@ class PlaylistRepositoryTest extends TestCase
         // Create a playlist for today
         $today = Carbon::today();
         $dateString = $today->format('Y-m-d');
-        
+
         $playlist = Playlist::factory()->create([
             'user_id' => $user->id,
-            'name' => 'Daily Playlist - ' . $today->format('F j, Y'),
+            'name' => 'Daily Playlist - '.$today->format('F j, Y'),
             'type' => 'auto',
             'visibility' => 'private',
             'last_generated_at' => $today,
@@ -199,15 +199,15 @@ class PlaylistRepositoryTest extends TestCase
 
         // Add some data to the cache
         $userPlaylistsCacheKey = "playlists:user:{$user->getKey()}:limit:10";
-        
+
         // Add a dummy collection to the cache
         Cache::put($userPlaylistsCacheKey, collect(['test']), 60);
-        
+
         // Verify cache has the test data
         $this->assertTrue(Cache::has($userPlaylistsCacheKey));
 
         // Create a new playlist
-        $playlist = new Playlist();
+        $playlist = new Playlist;
         $playlist->user_id = $user->id;
         $playlist->name = 'New Playlist';
         $playlist->description = 'A new playlist';
@@ -220,7 +220,7 @@ class PlaylistRepositoryTest extends TestCase
 
         // Store the playlist
         $this->playlistRepository->storePlaylist($playlist);
-        
+
         // Verify the playlist was stored
         $this->assertNotNull($playlist->id);
         $this->assertEquals('New Playlist', $playlist->name);
@@ -246,20 +246,20 @@ class PlaylistRepositoryTest extends TestCase
         // Add some data to the cache
         $playlistCacheKey = "playlist:{$playlist->id}";
         $userPlaylistsCacheKey = "playlists:user:{$user->getKey()}:limit:10";
-        
+
         Cache::put($playlistCacheKey, $playlist, 60);
         Cache::put($userPlaylistsCacheKey, collect([$playlist]), 60);
-        
+
         // Verify cache has the test data
         $this->assertTrue(Cache::has($playlistCacheKey));
         $this->assertTrue(Cache::has($userPlaylistsCacheKey));
 
         // Update the playlist visibility
         $this->playlistRepository->updateVisibility($playlist, 'public');
-        
-        // Reload the playlist from the database 
+
+        // Reload the playlist from the database
         $updatedPlaylist = Playlist::find($playlist->id);
-        
+
         // Verify the visibility was updated
         $this->assertEquals('public', $updatedPlaylist->visibility);
 
@@ -299,18 +299,18 @@ class PlaylistRepositoryTest extends TestCase
         // Add data to the cache
         $playlistCacheKey = "playlist:{$playlist->id}";
         Cache::put($playlistCacheKey, $playlist, 60);
-        
+
         // Verify cache has the test data
         $this->assertTrue(Cache::has($playlistCacheKey));
 
-        // We'll skip the actual call to markVideoAsWatched since we'd need to modify 
+        // We'll skip the actual call to markVideoAsWatched since we'd need to modify
         // the repository or create a proper mock of PlaylistItem to make it work.
         // Instead, let's just test that the cache is cleared when we call forget.
         Cache::forget($playlistCacheKey);
-        
+
         // Verify that the cache entry is cleared
         $this->assertFalse(Cache::has($playlistCacheKey));
-        
+
         // Skip the assertion that would check if marking as watched worked
         $this->assertTrue(true);
     }
@@ -349,12 +349,12 @@ class PlaylistRepositoryTest extends TestCase
         ]);
 
         // Clear any existing cache
-        $cacheKey = "playlists:trending:limit:10";
+        $cacheKey = 'playlists:trending:limit:10';
         Cache::forget($cacheKey);
 
         // Get trending playlists - should retrieve from database
         $trendingPlaylists = $this->playlistRepository->getTrendingPlaylists();
-        
+
         // Verify only public playlists are returned
         $this->assertGreaterThanOrEqual(1, $trendingPlaylists->count());
         foreach ($trendingPlaylists as $playlist) {

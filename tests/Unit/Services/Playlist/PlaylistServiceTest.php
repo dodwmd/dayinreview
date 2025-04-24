@@ -4,14 +4,12 @@ namespace Tests\Unit\Services\Playlist;
 
 use App\Models\Playlist;
 use App\Models\User;
-use App\Models\YoutubeVideo;
 use App\Repositories\ContentRepository;
 use App\Repositories\PlaylistRepository;
 use App\Services\Playlist\PlaylistService;
 use App\Services\YouTube\YouTubeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Mockery;
 use Tests\TestCase;
@@ -21,8 +19,11 @@ class PlaylistServiceTest extends TestCase
     use RefreshDatabase;
 
     protected ContentRepository $mockContentRepository;
+
     protected YouTubeService $mockYoutubeService;
+
     protected PlaylistRepository $mockPlaylistRepository;
+
     protected PlaylistService $playlistService;
 
     protected function setUp(): void
@@ -60,7 +61,7 @@ class PlaylistServiceTest extends TestCase
         $date = Carbon::create(2025, 4, 20);
 
         // Create a playlist for the test result
-        $newPlaylist = new Playlist();
+        $newPlaylist = new Playlist;
         $newPlaylist->id = (string) Str::uuid();
         $newPlaylist->user_id = $user->id;
         $newPlaylist->last_generated_at = $date;
@@ -148,7 +149,7 @@ class PlaylistServiceTest extends TestCase
         $date = Carbon::create(2025, 4, 20);
 
         // Create an existing playlist
-        $existingPlaylist = new Playlist();
+        $existingPlaylist = new Playlist;
         $existingPlaylist->id = (string) Str::uuid();
         $existingPlaylist->user_id = $user->id;
         $existingPlaylist->last_generated_at = $date;
@@ -213,14 +214,14 @@ class PlaylistServiceTest extends TestCase
         // Create mock playlists
         $mockPlaylists = collect([
             new Playlist([
-                'user_id' => $user->id, 
+                'user_id' => $user->id,
                 'last_generated_at' => Carbon::today(),
-                'visibility' => 'private'
+                'visibility' => 'private',
             ]),
             new Playlist([
-                'user_id' => $user->id, 
+                'user_id' => $user->id,
                 'last_generated_at' => Carbon::yesterday(),
-                'visibility' => 'public'
+                'visibility' => 'public',
             ]),
         ]);
 
@@ -249,7 +250,7 @@ class PlaylistServiceTest extends TestCase
         $playlistId = (string) Str::uuid();
 
         // Create a mock playlist
-        $mockPlaylist = new Playlist();
+        $mockPlaylist = new Playlist;
         $mockPlaylist->id = $playlistId;
         $mockPlaylist->user_id = $user->id;
         $mockPlaylist->last_generated_at = Carbon::today();
@@ -282,7 +283,7 @@ class PlaylistServiceTest extends TestCase
         $playlistId = (string) Str::uuid();
 
         // Create a mock playlist belonging to the other user
-        $mockPlaylist = new Playlist();
+        $mockPlaylist = new Playlist;
         $mockPlaylist->id = $playlistId;
         $mockPlaylist->user_id = $otherUser->id;
         $mockPlaylist->last_generated_at = Carbon::today();
@@ -313,7 +314,7 @@ class PlaylistServiceTest extends TestCase
         $playlistId = (string) Str::uuid();
 
         // Create a mock playlist
-        $mockPlaylist = new Playlist();
+        $mockPlaylist = new Playlist;
         $mockPlaylist->id = $playlistId;
         $mockPlaylist->user_id = $user->id;
         $mockPlaylist->last_generated_at = Carbon::today();
@@ -330,6 +331,7 @@ class PlaylistServiceTest extends TestCase
             ->with(Mockery::type(Playlist::class), 'public')
             ->andReturnUsing(function ($playlist, $visibility) {
                 $playlist->visibility = $visibility;
+
                 return $playlist;
             });
 
@@ -354,7 +356,7 @@ class PlaylistServiceTest extends TestCase
         $videoId = (string) Str::uuid();
 
         // Create a mock playlist
-        $mockPlaylist = new Playlist();
+        $mockPlaylist = new Playlist;
         $mockPlaylist->id = $playlistId;
         $mockPlaylist->user_id = $user->id;
         $mockPlaylist->last_generated_at = Carbon::today();

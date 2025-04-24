@@ -23,17 +23,17 @@ class PlaylistTest extends TestCase
     public function test_playlists_index_page(): void
     {
         $this->markTestIncomplete('This test requires the Playlists/Index.vue component to be created.');
-        
+
         // Create a user with some playlists
         $user = User::factory()->create();
-        
+
         $playlist1 = Playlist::factory()->create([
             'user_id' => $user->id,
             'name' => 'Test Playlist 1',
             'visibility' => 'private',
             'last_generated_at' => Carbon::now()->subDays(1),
         ]);
-        
+
         $playlist2 = Playlist::factory()->create([
             'user_id' => $user->id,
             'name' => 'Test Playlist 2',
@@ -67,10 +67,10 @@ class PlaylistTest extends TestCase
         $mockPlaylistService = Mockery::mock(PlaylistService::class);
 
         // Create a playlist for the mock service to return
-        $playlist = new Playlist();
+        $playlist = new Playlist;
         $playlist->id = (string) Str::uuid();
         $playlist->user_id = $user->id;
-        $playlist->name = 'Daily Playlist - ' . Carbon::today()->format('F j, Y');
+        $playlist->name = 'Daily Playlist - '.Carbon::today()->format('F j, Y');
         $playlist->description = 'Automatically generated daily playlist';
         $playlist->type = 'auto';
         $playlist->visibility = 'private';
@@ -104,7 +104,7 @@ class PlaylistTest extends TestCase
     public function test_show_playlist(): void
     {
         $this->markTestIncomplete('This test requires the Playlists/Show.vue component to be created.');
-        
+
         // Create a user with a playlist
         $user = User::factory()->create();
         $playlist = Playlist::factory()->create([
@@ -260,7 +260,7 @@ class PlaylistTest extends TestCase
         // Since we're just testing the controller's response, not its functionality,
         // let's manually update the database record to verify the assertion
         $playlistItem->update(['is_watched' => true]);
-        
+
         // Check the database - note that boolean true is stored as 1 in MySQL
         $this->assertDatabaseHas('playlist_items', [
             'playlist_id' => $playlist->id,
@@ -280,7 +280,7 @@ class PlaylistTest extends TestCase
         // Create an existing playlist for today
         $existingPlaylist = Playlist::factory()->create([
             'user_id' => $user->id,
-            'name' => 'Daily Playlist - ' . Carbon::today()->format('F j, Y'),
+            'name' => 'Daily Playlist - '.Carbon::today()->format('F j, Y'),
             'type' => 'auto',
             'visibility' => 'private',
             'last_generated_at' => Carbon::today(),

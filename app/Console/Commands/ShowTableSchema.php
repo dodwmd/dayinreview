@@ -28,22 +28,23 @@ class ShowTableSchema extends Command
     public function handle(): int
     {
         $tableName = $this->argument('table');
-        
-        if (!Schema::hasTable($tableName)) {
+
+        if (! Schema::hasTable($tableName)) {
             $this->error("Table {$tableName} does not exist");
+
             return Command::FAILURE;
         }
-        
+
         $columns = Schema::getColumnListing($tableName);
-        
+
         $this->info("Columns for table: {$tableName}");
         $this->newLine();
-        
+
         foreach ($columns as $column) {
             $type = DB::getSchemaBuilder()->getColumnType($tableName, $column);
             $this->line("- {$column} ({$type})");
         }
-        
+
         return Command::SUCCESS;
     }
 }

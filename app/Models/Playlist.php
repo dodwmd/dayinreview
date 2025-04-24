@@ -76,19 +76,18 @@ class Playlist extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(PlaylistItem::class)
-            ->orderBy('position');
+        return $this->hasMany(PlaylistItem::class);
     }
 
     /**
-     * Get the videos for the playlist.
+     * Get the playlist items containing videos.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function videos()
     {
-        return $this->belongsToMany(YoutubeVideo::class, 'playlist_items', 'playlist_id', 'source_id')
-            ->where('source_type', 'youtube_video')
-            ->withPivot(['position', 'is_watched', 'added_at', 'watched_at'])
-            ->orderBy('position');
+        return $this->hasMany(PlaylistItem::class)
+            ->where('source_type', YoutubeVideo::class);
     }
 
     /**
@@ -117,10 +116,10 @@ class Playlist extends Model
      */
     public function setVisibility(string $visibility): void
     {
-        if (!in_array($visibility, ['private', 'unlisted', 'public'])) {
+        if (! in_array($visibility, ['private', 'unlisted', 'public'])) {
             throw new \InvalidArgumentException('Invalid visibility value');
         }
-        
+
         $this->visibility = $visibility;
     }
 }

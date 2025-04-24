@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\PlaylistCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -16,9 +15,9 @@ class PlaylistCategoryFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<\App\Models\PlaylistCategory>
      */
-    protected $model = PlaylistCategory::class;
+    protected $model = \App\Models\PlaylistCategory::class;
 
     /**
      * Define the model's default state.

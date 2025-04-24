@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\YoutubeVideo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,9 +13,9 @@ class YoutubeVideoFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<\App\Models\YoutubeVideo>
      */
-    protected $model = YoutubeVideo::class;
+    protected $model = \App\Models\YoutubeVideo::class;
 
     /**
      * Define the model's default state.
@@ -46,8 +45,6 @@ class YoutubeVideoFactory extends Factory
 
     /**
      * Set the video as trending.
-     *
-     * @return static
      */
     public function trending(): static
     {
@@ -60,9 +57,6 @@ class YoutubeVideoFactory extends Factory
 
     /**
      * Set the video with a specific YouTube ID.
-     *
-     * @param string $youtubeId
-     * @return static
      */
     public function withYoutubeId(string $youtubeId): static
     {
