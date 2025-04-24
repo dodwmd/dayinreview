@@ -2,8 +2,8 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
 
 abstract class TestCase extends BaseTestCase
@@ -28,9 +28,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Assert that the number of database queries executed is less than or equal to a given amount.
-     *
-     * @param int $max
-     * @return void
      */
     protected function assertQueryCountLessThanOrEqual(int $max): void
     {
@@ -43,10 +40,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Assert that the execution of the given callback results in the expected number of database queries.
-     *
-     * @param int $expectedCount
-     * @param callable $callback
-     * @return void
      */
     protected function assertQueryCount(int $expectedCount, callable $callback): void
     {
@@ -76,11 +69,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Assert that the execution of the given callback results in fewer queries than another callback.
-     *
-     * @param callable $inefficientCallback
-     * @param callable $efficientCallback
-     * @param string $message
-     * @return void
      */
     protected function assertQueryCountLess(callable $inefficientCallback, callable $efficientCallback, string $message = ''): void
     {
@@ -113,15 +101,12 @@ abstract class TestCase extends BaseTestCase
     /**
      * Assert that an index is used in the query.
      *
-     * @param string $table
-     * @param string $column
-     * @param mixed $value
-     * @return void
+     * @param  mixed  $value
      */
     protected function assertIndexUsed(string $table, string $column, $value): void
     {
         $explain = DB::select("EXPLAIN SELECT * FROM {$table} WHERE {$column} = ?", [$value]);
-        
+
         // Check if 'possible_keys' column contains a value, which indicates an index might be used
         $this->assertNotNull(
             $explain[0]->possible_keys ?? null,

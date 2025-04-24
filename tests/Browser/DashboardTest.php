@@ -22,7 +22,7 @@ class DashboardTest extends DuskTestCase
     public function test_dashboard_displays_user_data(): void
     {
         $user = User::factory()->create();
-        
+
         // Create some playlists for the user
         $playlist = Playlist::factory()->create([
             'user_id' => $user->id,
@@ -32,12 +32,12 @@ class DashboardTest extends DuskTestCase
             'last_generated_at' => Carbon::today(),
             'view_count' => 5,
         ]);
-        
+
         // Add some videos to the playlist
         $video = YoutubeVideo::factory()->create([
             'title' => 'Test Dashboard Video',
         ]);
-        
+
         PlaylistItem::create([
             'id' => Str::uuid(),
             'playlist_id' => $playlist->id,
@@ -50,11 +50,11 @@ class DashboardTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/dashboard')
-                    ->assertSee('Dashboard')
-                    ->assertSee('Recent Activity')
-                    ->assertSee('Recent Playlist')
-                    ->assertSee('Test Dashboard Video');
+                ->visit('/dashboard')
+                ->assertSee('Dashboard')
+                ->assertSee('Recent Activity')
+                ->assertSee('Recent Playlist')
+                ->assertSee('Test Dashboard Video');
         });
     }
 
@@ -67,10 +67,10 @@ class DashboardTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/dashboard')
-                    ->clickLink('Playlists')
-                    ->assertPathIs('/playlists')
-                    ->assertSee('Your Playlists');
+                ->visit('/dashboard')
+                ->clickLink('Playlists')
+                ->assertPathIs('/playlists')
+                ->assertSee('Your Playlists');
         });
     }
 
@@ -83,10 +83,10 @@ class DashboardTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/dashboard')
-                    ->clickLink('Subscriptions')
-                    ->assertPathIs('/subscriptions')
-                    ->assertSee('Your Subscriptions');
+                ->visit('/dashboard')
+                ->clickLink('Subscriptions')
+                ->assertPathIs('/subscriptions')
+                ->assertSee('Your Subscriptions');
         });
     }
 
@@ -99,11 +99,11 @@ class DashboardTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/dashboard')
-                    ->press('Generate New Playlist')
-                    ->waitForText('Playlist generated successfully!')
-                    ->assertPathBeginsWith('/playlists/')
-                    ->assertSee('Daily Playlist');
+                ->visit('/dashboard')
+                ->press('Generate New Playlist')
+                ->waitForText('Playlist generated successfully!')
+                ->assertPathBeginsWith('/playlists/')
+                ->assertSee('Daily Playlist');
         });
     }
 
@@ -113,20 +113,20 @@ class DashboardTest extends DuskTestCase
     public function test_view_account_stats(): void
     {
         $user = User::factory()->create();
-        
+
         // Create multiple playlists with different stats
         Playlist::factory()->count(3)->create([
             'user_id' => $user->id,
             'type' => 'auto',
             'visibility' => 'private',
         ]);
-        
+
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/dashboard')
-                    ->assertSee('Account Statistics')
-                    ->assertSee('Total Playlists: 3')
-                    ->assertSee('Videos Watched');
+                ->visit('/dashboard')
+                ->assertSee('Account Statistics')
+                ->assertSee('Total Playlists: 3')
+                ->assertSee('Videos Watched');
         });
     }
 }

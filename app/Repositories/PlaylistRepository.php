@@ -34,6 +34,22 @@ class PlaylistRepository
     }
 
     /**
+     * Get a user's playlists with eager loaded items for optimized performance testing.
+     */
+    public function getUserPlaylistsWithItems(User $user, int $limit = 10): Collection
+    {
+        $cacheKey = "playlists:user:{$user->getKey()}:withItems:limit:{$limit}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $limit) {
+            return $user->playlists()
+                ->orderBy('created_at', 'desc')
+                ->limit($limit)
+                ->with(['items', 'items.source'])
+                ->get();
+        });
+    }
+
+    /**
      * Get a specific playlist with caching.
      */
     public function getPlaylist(string $playlistId): ?Playlist
@@ -205,6 +221,7 @@ class PlaylistRepository
         // Clear any cached user playlists with different limits
         for ($limit = 5; $limit <= 20; $limit += 5) {
             Cache::forget("playlists:user:{$userId}:limit:{$limit}");
+            Cache::forget("playlists:user:{$userId}:withItems:limit:{$limit}");
         }
     }
 }

@@ -23,11 +23,11 @@ class LoginTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                    ->type('email', 'test@example.com')
-                    ->type('password', 'password')
-                    ->press('Log in')
-                    ->assertPathIs('/dashboard')
-                    ->assertSee('Dashboard');
+                ->type('email', 'test@example.com')
+                ->type('password', 'password')
+                ->press('Log in')
+                ->assertPathIs('/dashboard')
+                ->assertSee('Dashboard');
         });
     }
 
@@ -38,9 +38,9 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                    ->press('Log in')
-                    ->assertSee('The email field is required')
-                    ->assertSee('The password field is required');
+                ->press('Log in')
+                ->assertSee('The email field is required')
+                ->assertSee('The password field is required');
         });
     }
 
@@ -51,13 +51,13 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/register')
-                    ->type('name', 'Test User')
-                    ->type('email', 'new-user@example.com')
-                    ->type('password', 'password')
-                    ->type('password_confirmation', 'password')
-                    ->press('Register')
-                    ->assertPathIs('/dashboard')
-                    ->assertSee('Dashboard');
+                ->type('name', 'Test User')
+                ->type('email', 'new-user@example.com')
+                ->type('password', 'password')
+                ->type('password_confirmation', 'password')
+                ->press('Register')
+                ->assertPathIs('/dashboard')
+                ->assertSee('Dashboard');
         });
 
         // Verify the user was created in the database
@@ -74,11 +74,11 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                    ->clickLink('Forgot your password?')
-                    ->assertPathIs('/forgot-password')
-                    ->type('email', 'test@example.com')
-                    ->press('Email Password Reset Link')
-                    ->assertSee('Password reset link sent');
+                ->clickLink('Forgot your password?')
+                ->assertPathIs('/forgot-password')
+                ->type('email', 'test@example.com')
+                ->press('Email Password Reset Link')
+                ->assertSee('Password reset link sent');
         });
     }
 }
