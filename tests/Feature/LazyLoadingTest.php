@@ -193,17 +193,17 @@ class LazyLoadingTest extends TestCase
         $allVideos = YoutubeVideo::get();
         $memoryAfterAll = memory_get_usage();
         $allColumnsMemory = $memoryAfterAll - $memoryBefore;
-        
+
         // Reset
         $allVideos = null;
         gc_collect_cycles();
-        
+
         // Record memory usage with selected columns
         $memoryBefore = memory_get_usage();
         $selectedVideos = YoutubeVideo::select(['id', 'title'])->get();
         $memoryAfterSelected = memory_get_usage();
         $selectedColumnsMemory = $memoryAfterSelected - $memoryBefore;
-        
+
         // Selected columns should use less memory than all columns
         // Even if the difference is small, it should be measurable
         $this->assertLessThanOrEqual(
@@ -211,7 +211,7 @@ class LazyLoadingTest extends TestCase
             $selectedColumnsMemory,
             "Selecting fewer columns should use less or equal memory: all=$allColumnsMemory, selected=$selectedColumnsMemory"
         );
-        
+
         // Verify we're only executing a single query
         $this->assertQueryCountLessThanOrEqual(3); // 1 for all columns, 1 for selected columns, 1 for potential metadata
     }

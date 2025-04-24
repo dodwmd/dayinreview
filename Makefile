@@ -26,7 +26,9 @@ dusk: ## Run Laravel Dusk browser tests
 	./scripts/dusk.sh
 
 test: lint static-analysis ## Run all tests (lint, static analysis)
-	./vendor/bin/sail artisan test
+	php artisan test
+	# Dusk tests are currently disabled due to browser/database configuration issues
+	# ./scripts/dusk.sh
 
 build: test ## Build the application for production
 	./scripts/build.sh

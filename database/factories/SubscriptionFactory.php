@@ -32,7 +32,7 @@ class SubscriptionFactory extends Factory
     /**
      * Configure the factory for a Reddit subscription.
      *
-     * @return $this
+     * @return static
      */
     public function reddit()
     {
@@ -40,7 +40,7 @@ class SubscriptionFactory extends Factory
             return [
                 'subscribable_type' => 'App\\Models\\RedditSubreddit',
                 'subscribable_id' => $this->faker->word(), // Subreddit name
-                'name' => 'r/' . $this->faker->word(),
+                'name' => 'r/'.$this->faker->word(),
             ];
         });
     }
@@ -48,15 +48,15 @@ class SubscriptionFactory extends Factory
     /**
      * Configure the factory for a YouTube subscription.
      *
-     * @return $this
+     * @return static
      */
     public function youtube()
     {
         return $this->state(function (array $attributes) {
             return [
                 'subscribable_type' => 'App\\Models\\YoutubeChannel',
-                'subscribable_id' => 'UC' . $this->faker->regexify('[A-Za-z0-9]{22}'), // YouTube channel ID format
-                'name' => $this->faker->company() . ' Channel',
+                'subscribable_id' => 'UC'.$this->faker->regexify('[A-Za-z0-9]{22}'), // YouTube channel ID format
+                'name' => $this->faker->company().' Channel',
             ];
         });
     }

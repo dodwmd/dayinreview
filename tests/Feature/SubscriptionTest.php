@@ -6,7 +6,6 @@ use App\Models\Subscription;
 use App\Models\SubscriptionCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class SubscriptionTest extends TestCase
@@ -82,10 +81,10 @@ class SubscriptionTest extends TestCase
                 'expires_at' => now()->addHour()->timestamp,
             ]),
         ]);
-        
+
         // Mock the YouTube service
         $youTubeServiceMock = $this->mock(\App\Services\YouTube\YouTubeService::class);
-        
+
         // Set up the mock to return channel info when getChannelInfo is called
         $youTubeServiceMock->shouldReceive('getChannelInfo')
             ->once()
@@ -94,7 +93,7 @@ class SubscriptionTest extends TestCase
                 'id' => 'UC_x5XG1OV2P6uZZ5FSM9Ttw',
                 'title' => 'Google Developers',
                 'description' => 'The Google Developers channel',
-                'thumbnail' => 'https://example.com/thumbnail.jpg'
+                'thumbnail' => 'https://example.com/thumbnail.jpg',
             ]);
 
         $response = $this->actingAs($user)
@@ -119,7 +118,7 @@ class SubscriptionTest extends TestCase
     public function test_toggle_subscription_favorite(): void
     {
         $user = User::factory()->create();
-        
+
         $subscription = Subscription::factory()->create([
             'user_id' => $user->id,
             'name' => 'Original Name',
@@ -146,7 +145,7 @@ class SubscriptionTest extends TestCase
     public function test_delete_subscription(): void
     {
         $user = User::factory()->create();
-        
+
         $subscription = Subscription::factory()->create([
             'user_id' => $user->id,
             'name' => 'Subscription to Delete',

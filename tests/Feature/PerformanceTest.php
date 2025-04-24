@@ -285,8 +285,8 @@ class PerformanceTest extends TestCase
         );
 
         // Approach 2: Count attributes
-        $allAttributes = count((array)$allColumnsVideos->first()->getAttributes());
-        $selectedAttributes = count((array)$selectedColumnsVideos->first()->getAttributes());
+        $allAttributes = count((array) $allColumnsVideos->first()->getAttributes());
+        $selectedAttributes = count((array) $selectedColumnsVideos->first()->getAttributes());
 
         // The selected columns query should have fewer attributes
         $this->assertLessThan(

@@ -27,12 +27,12 @@ class RedditPostFactory extends Factory
     {
         return [
             'id' => Str::uuid(),
-            'reddit_id' => 't3_' . $this->faker->regexify('[a-z0-9]{6}'),
+            'reddit_id' => 't3_'.$this->faker->regexify('[a-z0-9]{6}'),
             'subreddit' => $this->faker->randomElement(['programming', 'technology', 'webdev', 'datascience', 'javascript', 'python']),
             'title' => $this->faker->sentence(),
             'content' => $this->faker->optional()->paragraph(),
             'author' => $this->faker->userName(),
-            'permalink' => '/r/' . $this->faker->word() . '/comments/' . $this->faker->regexify('[a-z0-9]{6}'),
+            'permalink' => '/r/'.$this->faker->word().'/comments/'.$this->faker->regexify('[a-z0-9]{6}'),
             'url' => $this->faker->url(),
             'score' => $this->faker->numberBetween(1, 10000),
             'num_comments' => $this->faker->numberBetween(0, 500),
@@ -46,14 +46,14 @@ class RedditPostFactory extends Factory
     /**
      * Configure the model factory for a post with a YouTube video.
      *
-     * @return $this
+     * @return static
      */
     public function withYoutubeVideo()
     {
         return $this->state(function (array $attributes) {
             return [
                 'has_youtube_video' => true,
-                'url' => 'https://www.youtube.com/watch?v=' . $this->faker->regexify('[a-zA-Z0-9_-]{11}'),
+                'url' => 'https://www.youtube.com/watch?v='.$this->faker->regexify('[a-zA-Z0-9_-]{11}'),
             ];
         });
     }
@@ -61,7 +61,7 @@ class RedditPostFactory extends Factory
     /**
      * Configure the model factory for a high-scoring post.
      *
-     * @return $this
+     * @return static
      */
     public function popular()
     {

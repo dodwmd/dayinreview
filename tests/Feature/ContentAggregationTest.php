@@ -6,15 +6,8 @@ use App\Models\RedditPost;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\YoutubeVideo;
-use App\Services\Content\ContentAggregationService;
-use App\Services\Reddit\RedditService;
-use App\Services\YouTube\YouTubeService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Str;
-use Mockery;
 use Tests\TestCase;
 
 class ContentAggregationTest extends TestCase
@@ -25,98 +18,16 @@ class ContentAggregationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Use SQLite in-memory database for testing
-        $this->app['config']->set('database.default', 'sqlite');
-        $this->app['config']->set('database.connections.sqlite', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
-        
+
+        // Ensure MySQL is used for testing (not SQLite)
+        $this->app['config']->set('database.default', 'mysql');
+
         // Clear database connections
         DB::purge();
-        
-        // Create tables for testing
-        $this->createTestTables();
-    }
-    
-    /**
-     * Create the necessary tables for testing without using migrations.
-     */
-    protected function createTestTables(): void
-    {
-        // Create users table
-        Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->text('youtube_refresh_token')->nullable();
-            $table->text('reddit_refresh_token')->nullable();
-            $table->rememberToken();
-            $table->timestamps();
-        });
-        
-        // Create reddit_posts table
-        Schema::create('reddit_posts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('reddit_id')->unique();
-            $table->string('subreddit');
-            $table->string('title');
-            $table->text('content')->nullable();
-            $table->string('author');
-            $table->string('permalink');
-            $table->string('url');
-            $table->integer('score');
-            $table->integer('num_comments');
-            $table->boolean('has_youtube_video')->default(false);
-            $table->timestamp('posted_at');
-            $table->timestamps();
-        });
-        
-        // Create youtube_videos table
-        Schema::create('youtube_videos', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('youtube_id')->unique();
-            $table->uuid('reddit_post_id')->nullable();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->string('channel_id');
-            $table->string('channel_title');
-            $table->string('thumbnail_url')->nullable();
-            $table->timestamp('published_at')->nullable();
-            $table->integer('view_count')->default(0);
-            $table->integer('like_count')->default(0);
-            $table->integer('duration_seconds')->default(0);
-            $table->timestamps();
-            
-            // Add foreign key if reddit_posts table exists
-            if (Schema::hasTable('reddit_posts')) {
-                $table->foreign('reddit_post_id')->references('id')->on('reddit_posts')->onDelete('cascade');
-            }
-        });
-        
-        // Create subscriptions table
-        Schema::create('subscriptions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->string('subscribable_type');
-            $table->string('subscribable_id');
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->string('thumbnail_url')->nullable();
-            $table->boolean('is_favorite')->default(false);
-            $table->integer('priority')->default(0);
-            $table->timestamps();
-            
-            // Add foreign key if users table exists
-            if (Schema::hasTable('users')) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            }
-        });
-        
+
+        // Create tables for testing using migrations
+        $this->artisan('migrate:fresh');
+
         // Modify the UUID handling in models
         $models = [User::class, RedditPost::class, YoutubeVideo::class, Subscription::class];
         foreach ($models as $model) {
@@ -125,7 +36,18 @@ class ContentAggregationTest extends TestCase
             });
         }
     }
-    
+
+    /**
+     * Clean up after testing.
+     */
+    protected function tearDown(): void
+    {
+        // Clean up the database after each test
+        $this->artisan('migrate:fresh');
+
+        parent::tearDown();
+    }
+
     /**
      * Test aggregating content from Reddit with YouTube links.
      */

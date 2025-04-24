@@ -3,8 +3,8 @@
 namespace App\Services\Content;
 
 use App\Models\RedditPost;
-use App\Models\YoutubeVideo;
 use App\Models\User;
+use App\Models\YoutubeVideo;
 use App\Services\Reddit\RedditService;
 use App\Services\YouTube\YouTubeService;
 use Carbon\Carbon;
@@ -492,11 +492,11 @@ class ContentAggregationService
             // If the user has no subscriptions or we want to include popular content as well
             $popularStats = $this->processPopularPosts($timeframe, $limit);
             $stats['subscription_stats']['popular'] = $popularStats;
-            
+
             $stats['processed_posts'] += $popularStats['processed'];
             $stats['saved_reddit_posts'] += $popularStats['reddit_posts_saved'];
             $stats['saved_youtube_videos'] += $popularStats['youtube_videos_saved'];
-            
+
             return $stats;
         } catch (\Exception $e) {
             Log::error('Error aggregating content for user', [
@@ -505,7 +505,7 @@ class ContentAggregationService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            $stats['errors'][] = 'Error aggregating content: ' . $e->getMessage();
+            $stats['errors'][] = 'Error aggregating content: '.$e->getMessage();
 
             return $stats;
         }
