@@ -537,6 +537,39 @@ class YouTubeService
     }
 
     /**
+     * Extract YouTube video ID from various URL formats.
+     *
+     * @param  string  $url  The YouTube URL
+     * @return string|null The video ID or null if not a valid YouTube video URL
+     */
+    public function extractVideoId(string $url): ?string
+    {
+        // Clean and normalize the URL
+        $url = trim($url);
+        
+        // Convert to lowercase for case-insensitive matching
+        $urlLower = strtolower($url);
+        
+        // Standard youtube.com/watch?v= format (case-insensitive)
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/i', $url, $matches)) {
+            return trim($matches[1]); // Trim to handle spaces
+        }
+        
+        // Embedded format: youtube.com/embed/{id} (case-insensitive)
+        if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/i', $url, $matches)) {
+            return trim($matches[1]);
+        }
+        
+        // Handle URLs with space in the query parameter (like ?v= dQw4w9WgXcQ)
+        if (preg_match('/[?&]v=\s*([a-zA-Z0-9_-]+)/i', $url, $matches)) {
+            return trim($matches[1]);
+        }
+        
+        // Not a valid YouTube video URL
+        return null;
+    }
+
+    /**
      * Format video data into a consistent structure.
      */
     protected function formatVideoData(array $item): array
