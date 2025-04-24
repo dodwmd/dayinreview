@@ -39,6 +39,18 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('playlists.index')"
+                                    :active="route().current('playlists.*')"
+                                >
+                                    Playlists
+                                </NavLink>
+                                <NavLink
+                                    :href="route('subscriptions.index')"
+                                    :active="route().current('subscriptions.*')"
+                                >
+                                    Subscriptions
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +157,18 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('playlists.index')"
+                            :active="route().current('playlists.*')"
+                        >
+                            Playlists
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('subscriptions.index')"
+                            :active="route().current('subscriptions.*')"
+                        >
+                            Subscriptions
                         </ResponsiveNavLink>
                     </div>
 
