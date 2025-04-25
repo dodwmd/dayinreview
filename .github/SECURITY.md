@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it by emailing security@workmates.com or by opening an issue with the label `security`. We will respond as soon as possible to address the issue.
+If you discover a security vulnerability, please report it by emailing security@cloudops.holdings or by opening an issue with the label `security`. We will respond as soon as possible to address the issue.
 
 ## Supported Versions
 

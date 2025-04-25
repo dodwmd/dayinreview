@@ -1,6 +1,6 @@
-# Contributing to Workmates
+# Contributing to Day in Review
 
-Thank you for considering contributing to Workmates! Please follow these guidelines to help us maintain a welcoming and productive community.
+Thank you for considering contributing to Day in Review! Please follow these guidelines to help us maintain a welcoming and productive community.
 
 ## How to Contribute
 - Fork the repository and create your branch from `main`.
