@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 LABEL maintainer="Day in Review"
 LABEL org.opencontainers.image.source="https://github.com/dodwmd/dayinreview"
