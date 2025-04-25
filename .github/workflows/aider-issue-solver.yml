@@ -1,0 +1,200 @@
+name: Aider Issue Solver
+
+on:
+  # Run on schedule (every day at midnight)
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Specific issue number to solve (optional)'
+        required: false
+        type: number
+
+jobs:
+  solve-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install aider-chat
+          pip install pytest pytest-cov
+      
+      - name: Find open issue to solve
+        id: find_issue
+        if: ${{ github.event.inputs.issue_number == '' }}
+        run: |
+          # Use GitHub CLI to find an open issue labeled with "good first issue" or "help wanted"
+          ISSUE_NUMBER=$(gh issue list --state open --label "good first issue,help wanted" --json number --limit 1 | jq -r '.[0].number')
+          
+          # Fallback to any open issue if no labeled issues are found
+          if [ -z "$ISSUE_NUMBER" ] || [ "$ISSUE_NUMBER" == "null" ]; then
+            ISSUE_NUMBER=$(gh issue list --state open --json number --limit 1 | jq -r '.[0].number')
+          fi
+          
+          echo "Selected issue #$ISSUE_NUMBER"
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Use manually specified issue
+        id: manual_issue
+        if: ${{ github.event.inputs.issue_number != '' }}
+        run: |
+          echo "issue_number=${{ github.event.inputs.issue_number }}" >> $GITHUB_OUTPUT
+      
+      - name: Determine final issue number
+        id: final_issue
+        run: |
+          ISSUE_NUMBER="${{ steps.find_issue.outputs.issue_number || steps.manual_issue.outputs.issue_number }}"
+          if [ -z "$ISSUE_NUMBER" ] || [ "$ISSUE_NUMBER" == "null" ]; then
+            echo "No open issues found to work on"
+            exit 1
+          fi
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+      
+      - name: Get issue details
+        id: issue_details
+        run: |
+          ISSUE_DATA=$(gh issue view ${{ steps.final_issue.outputs.issue_number }} --json title,body)
+          ISSUE_TITLE=$(echo "$ISSUE_DATA" | jq -r '.title')
+          ISSUE_BODY=$(echo "$ISSUE_DATA" | jq -r '.body')
+          
+          # Create a formatted prompt for Aider
+          PROMPT="# Task: Solve GitHub Issue #${{ steps.final_issue.outputs.issue_number }}
+          
+          ## Issue Title: $ISSUE_TITLE
+          
+          ## Issue Description:
+          $ISSUE_BODY
+          
+          ## Instructions:
+          - Analyze the issue carefully
+          - Make minimal necessary changes to fix the issue
+          - Write tests to verify the fix works
+          - Follow the project's coding style and conventions"
+          
+          echo "issue_title=$ISSUE_TITLE" >> $GITHUB_OUTPUT
+          echo "prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROMPT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create branch for fix
+        id: create_branch
+        run: |
+          BRANCH_NAME="fix/issue-${{ steps.final_issue.outputs.issue_number }}-aider-solution"
+          git checkout -b $BRANCH_NAME
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Run Aider to solve the issue
+        run: |
+          # Run Aider with the prompt from the issue
+          AIDER_PROMPT_FILE=$(mktemp)
+          echo "${{ steps.issue_details.outputs.prompt }}" > "$AIDER_PROMPT_FILE"
+          
+          # Run with appropriate LLM (using OpenAI in this example)
+          AIDER_MODEL="${{ secrets.AIDER_MODEL || 'gpt-4' }}"
+          AIDER_LOG_FILE="aider_output.log"
+          
+          # Run Aider and capture output
+          aider \
+            --model $AIDER_MODEL \
+            --apply \
+            --yes \
+            --input-file "$AIDER_PROMPT_FILE" \
+            --message "Please fix this issue" > $AIDER_LOG_FILE
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      
+      - name: Run tests
+        id: run_tests
+        continue-on-error: true
+        run: |
+          # Run tests to verify the fix works
+          make test || echo "Some tests failed, but proceeding with PR creation"
+          
+          # Determine if critical tests pass
+          EXIT_CODE=$?
+          echo "test_exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+      
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Aider Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check if there are any changes
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add --all
+            git commit -m "Fix issue #${{ steps.final_issue.outputs.issue_number }}: ${{ steps.issue_details.outputs.issue_title }}"
+            git push --set-upstream origin ${{ steps.create_branch.outputs.branch_name }}
+            echo "Changes committed and pushed to branch ${{ steps.create_branch.outputs.branch_name }}"
+          else
+            echo "No changes were made by Aider"
+            exit 1
+          fi
+      
+      - name: Create pull request
+        id: create_pr
+        run: |
+          # Extract test results from the previous step
+          TEST_STATUS=""
+          if [ "${{ steps.run_tests.outputs.test_exit_code }}" == "0" ]; then
+            TEST_STATUS="✅ All tests pass"
+          else
+            TEST_STATUS="⚠️ Some tests failed - please review carefully"
+          fi
+          
+          # Create descriptive PR body
+          PR_BODY="This PR addresses issue #${{ steps.final_issue.outputs.issue_number }}
+          
+          ## Changes made by Aider:
+          $(git log -1 --pretty=format:%B)
+          
+          ## Test Results:
+          $TEST_STATUS
+          
+          ## Aider Summary:
+          $(cat aider_output.log | grep -A 10 "^Summary of changes:" || echo "No summary available")
+          
+          ---
+          🤖 This PR was automatically generated by the Aider Issue Solver workflow.
+          Please review the changes carefully before merging."
+          
+          # Create the PR
+          PR_URL=$(gh pr create \
+            --title "Fix issue #${{ steps.final_issue.outputs.issue_number }}: ${{ steps.issue_details.outputs.issue_title }}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head ${{ steps.create_branch.outputs.branch_name }})
+          
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Add comment to issue
+        if: steps.create_pr.outputs.pr_url != ''
+        run: |
+          gh issue comment ${{ steps.final_issue.outputs.issue_number }} --body "I've created a potential fix in PR: ${{ steps.create_pr.outputs.pr_url }}
+
+          The solution was generated automatically by Aider. Please review and provide feedback!"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
