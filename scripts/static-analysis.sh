@@ -35,4 +35,19 @@ else
     ./vendor/bin/sail php ./vendor/bin/phpstan analyse --no-progress
 fi
 
-echo "✅ Static analysis completed!"
+echo "✅ PHPStan analysis completed!"
+
+# Run Psalm
+echo "🔍 Running Psalm static analysis..."
+
+if [ -n "$CI" ]; then
+    # In CI, run Psalm directly without Sail
+    ./vendor/bin/psalm --no-progress --no-cache
+else
+    # In local environment, run through Sail
+    ./vendor/bin/sail php ./vendor/bin/psalm --no-progress --no-cache
+fi
+
+echo "✅ Psalm analysis completed!"
+
+echo "✅ All static analysis completed successfully!"

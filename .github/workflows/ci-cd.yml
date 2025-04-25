@@ -90,11 +90,13 @@ jobs:
       - name: install composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: install Laravel Pint, PHPStan & ParaTest
+      - name: install Laravel Pint, PHPStan, ParaTest & Psalm
         run: |
           composer require laravel/pint --dev
           composer require phpstan/phpstan --dev
           composer require brianium/paratest:^7.0 --dev
+          composer require vimeo/psalm --dev
+          composer require psalm/plugin-laravel --dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
