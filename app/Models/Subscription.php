@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Subscription extends Model
 {
+    /** @use HasFactory<\Database\Factories\SubscriptionFactory> */
     use HasFactory, HasUuids;
 
     /**

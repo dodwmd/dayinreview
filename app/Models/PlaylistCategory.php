@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class PlaylistCategory extends Model
 {
+    /** @use HasFactory<\Database\Factories\PlaylistCategoryFactory> */
     use HasFactory, HasUuids;
 
     /**

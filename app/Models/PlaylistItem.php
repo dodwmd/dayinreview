@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class PlaylistItem extends Model
 {
+    /** @use HasFactory<\Database\Factories\PlaylistItemFactory> */
     use HasFactory, HasUuids;
 
     /**

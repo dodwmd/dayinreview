@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class YoutubeVideo extends Model
 {
+    /** @use HasFactory<\Database\Factories\YoutubeVideoFactory> */
     use HasFactory;
 
     /**

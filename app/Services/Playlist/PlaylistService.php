@@ -211,15 +211,18 @@ class PlaylistService
             }
 
             // Find existing video or create a new one
-            $video = YoutubeVideo::firstOrNew(['youtube_id' => $videoId]);
+            /** @var YoutubeVideo $video */
+            $video = YoutubeVideo::query()->firstOrNew(['youtube_id' => $videoId]);
 
             // Update video data
-            $video->title = $videoData['title'] ?? '';
-            $video->description = $videoData['description'] ?? '';
-            $video->thumbnail_url = $videoData['thumbnail'] ?? null;
-            $video->channel_id = $videoData['channel_id'] ?? '';
-            $video->channel_title = $videoData['channel_title'] ?? '';
-            $video->duration_seconds = $videoData['duration_seconds'] ?? 0;
+            $video->fill([
+                'title' => $videoData['title'] ?? '',
+                'description' => $videoData['description'] ?? '',
+                'thumbnail_url' => $videoData['thumbnail'] ?? null,
+                'channel_id' => $videoData['channel_id'] ?? '',
+                'channel_title' => $videoData['channel_title'] ?? '',
+                'duration_seconds' => $videoData['duration_seconds'] ?? 0,
+            ]);
 
             // Save if new or changed
             if ($video->isDirty()) {

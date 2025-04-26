@@ -24,5 +24,7 @@
     <issueHandlers>
         <MissingImmutableAnnotation errorLevel="suppress" />
         <ClassMustBeFinal errorLevel="suppress" />
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <UndefinedPropertyAssignment errorLevel="suppress" />
     </issueHandlers>
 </psalm>
