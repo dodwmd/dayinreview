@@ -188,8 +188,8 @@ class PlaylistRepository
                 return collect();
             }
 
-            // Use a different approach to get playlists with relationships
-            $playlists = collect();
+            // Create an array to hold playlists, then convert to collection
+            $playlistsArray = [];
 
             // Fetch each playlist individually with relationships
             foreach ($playlistIds as $id) {
@@ -197,11 +197,11 @@ class PlaylistRepository
                 if ($playlist) {
                     // Load the relationships
                     $playlist->load(['videos', 'user:id,name']);
-                    $playlists->push($playlist);
+                    $playlistsArray[] = $playlist;
                 }
             }
 
-            return $playlists;
+            return collect($playlistsArray);
         });
     }
 

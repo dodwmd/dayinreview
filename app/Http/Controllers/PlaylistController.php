@@ -87,10 +87,11 @@ class PlaylistController extends Controller
             'created_at' => $playlist->created_at,
             'updated_at' => $playlist->updated_at,
             'videos' => (function () use ($playlist) {
-                /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\PlaylistItem> $items */
+                /** @var \Illuminate\Support\Collection<int, \App\Models\PlaylistItem> $items */
                 $items = $playlist->videos;
 
-                return $items->map(function (PlaylistItem $playlistItem) {
+                /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
+                $result = $items->map(function (PlaylistItem $playlistItem) {
                     /** @var YoutubeVideo $source */
                     $source = $playlistItem->source;
 
@@ -109,8 +110,9 @@ class PlaylistController extends Controller
                             'source' => $playlistItem->notes === 'Trending' ? 'trending' : 'subscription',
                         ],
                     ];
-                })
-                    ->sortBy(function (array $video) {
+                })->toArray();
+
+                return collect($result)->sortBy(function (array $video) {
                         return $video['pivot']['position'];
                     })
                     ->values();

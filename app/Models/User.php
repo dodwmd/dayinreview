@@ -23,8 +23,10 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    /** @use HasApiTokens<User> */
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /**
+     * @use HasApiTokens<\Laravel\Sanctum\PersonalAccessToken>
+     * @use HasFactory<\Database\Factories\UserFactory>
+     */
     use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
     /**

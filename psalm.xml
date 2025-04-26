@@ -26,5 +26,6 @@
         <ClassMustBeFinal errorLevel="suppress" />
         <MissingOverrideAttribute errorLevel="suppress" />
         <UndefinedPropertyAssignment errorLevel="suppress" />
+        <NoInterfaceProperties errorLevel="suppress" />
     </issueHandlers>
 </psalm>
