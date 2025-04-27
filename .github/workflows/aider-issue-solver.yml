@@ -144,7 +144,8 @@ jobs:
           # Check if there are any changes
           if [[ -n "$(git status --porcelain)" ]]; then
             git add --all
-            git commit -m "Fix issue #${{ steps.final_issue.outputs.issue_number }}: ${{ steps.issue_details.outputs.issue_title }}"
+            ISSUE_TITLE="${{ steps.issue_details.outputs.issue_title }}"
+            git commit -m "Fix issue #${{ steps.final_issue.outputs.issue_number }}: $ISSUE_TITLE"
             git push --set-upstream origin ${{ steps.create_branch.outputs.branch_name }}
             echo "Changes committed and pushed to branch ${{ steps.create_branch.outputs.branch_name }}"
           else
