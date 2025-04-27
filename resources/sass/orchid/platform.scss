@@ -1,0 +1,40 @@
+// Custom Day in Review theme colors
+$primary: #3490dc; // Blue primary color
+$secondary: #6574cd; // Indigo secondary color
+$success: #38c172; // Green success color
+$info: #6cb2eb; // Light blue info color
+$warning: #ffed4a; // Yellow warning color
+$danger: #e3342f; // Red danger color
+
+// Import the Orchid source - using direct node_modules path for Vite
+@import "../../../../node_modules/orchid-ui/scss/app";
+
+// Custom styling overrides
+.brand-logo {
+    max-height: 2rem;
+}
+
+.bg-primary-dark {
+    background-color: darken($primary, 10%);
+}
+
+.h1-brand {
+    color: $primary;
+    font-weight: 700;
+}
+
+.div-brand {
+    color: $secondary;
+}
+
+// Custom dashboard card styling
+.card-dashboard {
+    border-top: 3px solid $primary;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+}

@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.10.1",
+        "orchid/platform": "^14.50",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

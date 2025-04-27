@@ -34,6 +34,8 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'recentPlaylists' => $recentPlaylists->map(function ($playlist) {
+                // Using explicit type-casting to make PHPStan happy
+                /** @var \App\Models\Playlist $playlist */
                 return [
                     'id' => $playlist->id,
                     'name' => $playlist->name,

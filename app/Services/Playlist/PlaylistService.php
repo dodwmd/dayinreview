@@ -98,10 +98,10 @@ class PlaylistService
      */
     protected function getTrendingVideos(User $user): Collection
     {
-        // Get user's Reddit subscriptions (subreddits)
+        // Get user's Reddit subscriptions (subreddits) using a where clause instead of scope
         $subreddits = $user->subscriptions()
-            ->reddit()
-            ->pluck('subscribable_id')
+            ->where('source_type', 'App\\Models\\RedditSubreddit')
+            ->pluck('source_id')
             ->toArray();
 
         // If user has no Reddit subscriptions, get general trending videos
@@ -118,10 +118,10 @@ class PlaylistService
      */
     protected function getSubscriptionVideos(User $user): Collection
     {
-        // Get user's YouTube channel subscriptions
+        // Get user's YouTube channel subscriptions using a where clause instead of scope
         $channels = $user->subscriptions()
-            ->youtube()
-            ->pluck('subscribable_id')
+            ->where('source_type', 'App\\Models\\YouTubeChannel')
+            ->pluck('source_id')
             ->toArray();
 
         if (empty($channels) || empty($user->youtube_token)) {

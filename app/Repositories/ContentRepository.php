@@ -3,11 +3,11 @@
 namespace App\Repositories;
 
 use App\Models\YoutubeVideo;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ContentRepository
 {
@@ -84,13 +84,13 @@ class ContentRepository
                 ->orderBy('view_count', 'desc')
                 ->limit($limit)
                 ->get();
-                
+
             // First get the videos as an array, then create a new collection
             $formattedVideos = [];
             foreach ($videos as $video) {
                 $formattedVideos[] = $this->formatModelData($video);
             }
-            
+
             /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
             return collect($formattedVideos);
         });
@@ -114,13 +114,13 @@ class ContentRepository
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
                 ->get();
-                
+
             // First get the videos as an array, then create a new collection
             $formattedVideos = [];
             foreach ($videos as $video) {
                 $formattedVideos[] = $this->formatModelData($video);
             }
-            
+
             /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
             return collect($formattedVideos);
         });

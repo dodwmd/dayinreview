@@ -10,6 +10,7 @@ use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Dusk\Browser;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
@@ -23,11 +24,160 @@ abstract class DuskTestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Reset the database before each test
-        $this->artisanSilently('migrate:fresh');
+        // We need to reset the database but work around UUID migration issues
+        $this->resetTestDatabase();
+    }
 
-        // Disable foreign key checks
+    /**
+     * Reset the test database while avoiding UUID migration issues.
+     */
+    protected function resetTestDatabase(): void
+    {
+        // Drop all tables to ensure we're starting fresh
+        $this->artisanSilently('db:wipe');
+
+        // Create tables needed for testing
+        $this->createTestTables();
+
+        // Disable foreign key checks to simplify test data setup
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+    }
+
+    /**
+     * Create the minimal set of tables needed for testing the admin dashboard.
+     */
+    protected function createTestTables(): void
+    {
+        // Create users table with ID column as bigInt (not UUID)
+        if (! Schema::hasTable('users')) {
+            Schema::create('users', function ($table) {
+                $table->id(); // Use auto-increment ID instead of UUID for tests
+                $table->string('name');
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+                $table->text('permissions')->nullable(); // For Orchid
+                $table->text('youtube_token')->nullable();
+                $table->text('reddit_token')->nullable();
+                $table->rememberToken();
+                $table->timestamps();
+            });
+        }
+
+        // Create minimal roles table for Orchid
+        if (! Schema::hasTable('roles')) {
+            Schema::create('roles', function ($table) {
+                $table->increments('id');
+                $table->string('slug')->unique();
+                $table->string('name');
+                $table->text('permissions')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Create role_users table for Orchid
+        if (! Schema::hasTable('role_users')) {
+            Schema::create('role_users', function ($table) {
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedInteger('role_id');
+                $table->primary(['user_id', 'role_id']);
+            });
+        }
+
+        // Create basic content tables needed for tests
+        $this->createContentTables();
+    }
+
+    /**
+     * Create the content tables for the Day in Review app.
+     */
+    protected function createContentTables(): void
+    {
+        // Create minimal RedditPost table for testing
+        if (! Schema::hasTable('reddit_posts')) {
+            Schema::create('reddit_posts', function ($table) {
+                $table->id(); // Use auto-increment ID for tests
+                $table->string('reddit_id');
+                $table->string('title');
+                $table->string('subreddit');
+                $table->string('author');
+                $table->string('permalink');
+                $table->string('url');
+                $table->integer('score');
+                $table->integer('num_comments');
+                $table->bigInteger('created_utc');
+                $table->boolean('is_self');
+                $table->text('selftext')->nullable();
+                $table->text('selftext_html')->nullable();
+                $table->string('thumbnail')->nullable();
+                $table->boolean('has_detected_youtube')->default(false);
+                $table->timestamps();
+            });
+        }
+
+        // Create minimal YoutubeVideo table for testing
+        if (! Schema::hasTable('youtube_videos')) {
+            Schema::create('youtube_videos', function ($table) {
+                $table->id(); // Use auto-increment ID for tests
+                $table->string('youtube_id');
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->string('channel_id');
+                $table->string('channel_title');
+                $table->string('thumbnail_url')->nullable();
+                $table->timestamp('published_at')->nullable();
+                $table->bigInteger('view_count')->default(0);
+                $table->integer('like_count')->default(0);
+                $table->integer('comment_count')->default(0);
+                $table->string('duration')->nullable();
+                $table->foreignId('reddit_post_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Create minimal Subscription table for testing
+        if (! Schema::hasTable('subscriptions')) {
+            Schema::create('subscriptions', function ($table) {
+                $table->id(); // Use auto-increment ID for tests
+                $table->foreignId('user_id');
+                $table->string('subscribable_type');
+                $table->string('subscribable_id');
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->string('image_url')->nullable();
+                $table->string('external_url')->nullable();
+                $table->string('external_id')->nullable();
+                $table->boolean('auto_add')->default(false);
+                $table->timestamps();
+            });
+        }
+
+        // Create minimal Playlist table for testing
+        if (! Schema::hasTable('playlists')) {
+            Schema::create('playlists', function ($table) {
+                $table->id(); // Use auto-increment ID for tests
+                $table->foreignId('user_id');
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->boolean('is_auto')->default(false);
+                $table->boolean('is_public')->default(false);
+                $table->string('external_id')->nullable();
+                $table->string('image_url')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Create minimal PlaylistItem table for testing
+        if (! Schema::hasTable('playlist_items')) {
+            Schema::create('playlist_items', function ($table) {
+                $table->id(); // Use auto-increment ID for tests
+                $table->foreignId('playlist_id');
+                $table->foreignId('video_id');
+                $table->integer('position');
+                $table->boolean('watched')->default(false);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

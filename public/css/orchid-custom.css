@@ -1,0 +1,62 @@
+/* Day in Review - Custom Orchid Admin Styles */
+
+:root {
+    --primary: #3490dc; /* Blue primary color */
+    --secondary: #6574cd; /* Indigo secondary color */
+    --success: #38c172; /* Green success color */
+    --info: #6cb2eb; /* Light blue info color */
+    --warning: #ffed4a; /* Yellow warning color */
+    --danger: #e3342f; /* Red danger color */
+}
+
+/* Custom styling overrides */
+.brand-logo {
+    max-height: 2rem;
+}
+
+.bg-primary-dark {
+    background-color: #2779bd; /* Darker blue */
+}
+
+.h1-brand {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.div-brand {
+    color: var(--secondary);
+}
+
+/* Custom dashboard card styling */
+.card-dashboard {
+    border-top: 3px solid var(--primary);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.card-dashboard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard header customization */
+.navbar-brand .navbar-item {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* Override menu colors */
+.subheader-container {
+    background-color: var(--primary);
+}
+
+.navbar-item.active {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+/* Custom footer styling */
+.app-footer {
+    border-top: 1px solid #e6e6e6;
+    padding-top: 1rem;
+}

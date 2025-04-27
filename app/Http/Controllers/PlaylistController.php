@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Playlist;
-use App\Models\PlaylistItem;
-use App\Models\YoutubeVideo;
 use App\Services\Playlist\PlaylistService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,32 +88,35 @@ class PlaylistController extends Controller
                 /** @var \Illuminate\Support\Collection<int, \App\Models\PlaylistItem> $items */
                 $items = $playlist->videos;
 
-                /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
-                $result = $items->map(function (PlaylistItem $playlistItem) {
-                    /** @var YoutubeVideo $source */
+                // Map each playlist item to an array of video data
+                $videos = [];
+                foreach ($items as $playlistItem) {
+                    /** @var \App\Models\YoutubeVideo $source */
                     $source = $playlistItem->source;
 
-                    return [
-                        'id' => $source->id,
-                        'youtube_id' => $source->youtube_id,
-                        'title' => $source->title,
-                        'description' => $source->description,
-                        'thumbnail_url' => $source->thumbnail_url,
-                        'channel_id' => $source->channel_id,
-                        'channel_title' => $source->channel_title,
-                        'duration_seconds' => $source->duration_seconds,
+                    // Explicitly check if all required properties exist
+                    $videoData = [
+                        'id' => $source->id ?? null,
+                        'youtube_id' => $source->youtube_id ?? null,
+                        'title' => $source->title ?? 'Untitled Video',
+                        'description' => $source->description ?? '',
+                        'thumbnail_url' => $source->thumbnail_url ?? null,
+                        'channel_id' => $source->channel_id ?? null,
+                        'channel_title' => $source->channel_title ?? 'Unknown Channel',
+                        'duration_seconds' => $source->duration_seconds ?? 0,
                         'pivot' => [
                             'position' => $playlistItem->position,
                             'watched' => $playlistItem->is_watched,
                             'source' => $playlistItem->notes === 'Trending' ? 'trending' : 'subscription',
                         ],
                     ];
-                })->toArray();
 
-                return collect($result)->sortBy(function (array $video) {
-                        return $video['pivot']['position'];
-                    })
-                    ->values();
+                    $videos[] = $videoData;
+                }
+
+                return collect($videos)->sortBy(function (array $video) {
+                    return $video['pivot']['position'];
+                })->values();
             })(),
         ];
 
