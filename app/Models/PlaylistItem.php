@@ -22,9 +22,13 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Playlist $playlist
  * @property-read Model $source
+ *
+ * @method static \App\Models\PlaylistItem findOrFail($id)
+ * @method static \Illuminate\Database\Eloquent\Builder|PlaylistItem where($column, $operator = null, $value = null, $boolean = 'and')
  */
 class PlaylistItem extends Model
 {
+    /** @use HasFactory<\Database\Factories\PlaylistItemFactory> */
     use HasFactory, HasUuids;
 
     /**

@@ -90,11 +90,13 @@ jobs:
       - name: install composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: install Laravel Pint, PHPStan & ParaTest
+      - name: install Laravel Pint, PHPStan, ParaTest & Psalm
         run: |
           composer require laravel/pint --dev
           composer require phpstan/phpstan --dev
           composer require brianium/paratest:^7.0 --dev
+          composer require vimeo/psalm --dev
+          composer require psalm/plugin-laravel --dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -131,6 +133,44 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: sail
           DB_PASSWORD: password
+
+      - name: Setup for Dusk
+        run: |
+          # Install Chrome
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+          # Install ChromeDriver
+          php artisan dusk:chrome-driver --detect
+          
+          # Create special Dusk environment
+          cp .env.testing .env.dusk.local
+          
+          # Prepare the database - don't seed (tests use DatabaseMigrations)
+          php artisan migrate:fresh --env=dusk.local
+          
+      - name: Start server for Dusk
+        run: |
+          # Start Laravel server with proper env
+          php artisan serve --env=dusk.local &
+          echo $! > server.pid
+          
+          # Wait for server to start
+          echo "Waiting for server to start..."
+          sleep 5
+        env:
+          APP_URL: http://127.0.0.1:8000
+          
+      - name: Run Dusk tests
+        run: php artisan dusk --env=dusk.local
+        
+      - name: Stop Laravel server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm server.pid
+          fi
 
   build_deploy:
     name: build and deploy

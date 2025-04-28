@@ -3,6 +3,7 @@
 namespace App\Services\Content;
 
 use App\Models\RedditPost;
+use App\Models\User;
 use App\Models\YoutubeVideo;
 use App\Services\Reddit\RedditService;
 use App\Services\YouTube\YouTubeService;
@@ -450,6 +451,63 @@ class ContentAggregationService
             ]);
 
             return [];
+        }
+    }
+
+    /**
+     * Aggregate content based on a user's subscriptions.
+     *
+     * @param  \App\Models\User  $user  The user whose subscriptions to aggregate content for
+     * @param  string  $timeframe  The timeframe for posts (hour, day, week, month, year, all)
+     * @param  int  $limit  The number of posts to retrieve per subscription
+     * @return array Summary of the aggregation operation
+     */
+    public function aggregateContentForUser($user, string $timeframe = 'day', int $limit = 25): array
+    {
+        $stats = [
+            'processed_posts' => 0,
+            'saved_reddit_posts' => 0,
+            'saved_youtube_videos' => 0,
+            'errors' => [],
+            'subscription_stats' => [],
+        ];
+
+        try {
+            // Get the user's Reddit subscriptions (subreddits)
+            $subreddits = $user->subscriptions()
+                ->where('subscribable_type', 'App\\Models\\RedditSubreddit')
+                ->pluck('subscribable_id')
+                ->toArray();
+
+            // Process each subreddit from the user's subscriptions
+            foreach ($subreddits as $subreddit) {
+                $subredditStats = $this->processSubredditPosts($subreddit, $timeframe, $limit);
+                $stats['subscription_stats'][$subreddit] = $subredditStats;
+
+                $stats['processed_posts'] += $subredditStats['processed'];
+                $stats['saved_reddit_posts'] += $subredditStats['reddit_posts_saved'];
+                $stats['saved_youtube_videos'] += $subredditStats['youtube_videos_saved'];
+            }
+
+            // If the user has no subscriptions or we want to include popular content as well
+            $popularStats = $this->processPopularPosts($timeframe, $limit);
+            $stats['subscription_stats']['popular'] = $popularStats;
+
+            $stats['processed_posts'] += $popularStats['processed'];
+            $stats['saved_reddit_posts'] += $popularStats['reddit_posts_saved'];
+            $stats['saved_youtube_videos'] += $popularStats['youtube_videos_saved'];
+
+            return $stats;
+        } catch (\Exception $e) {
+            Log::error('Error aggregating content for user', [
+                'user_id' => $user->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            $stats['errors'][] = 'Error aggregating content: '.$e->getMessage();
+
+            return $stats;
         }
     }
 }

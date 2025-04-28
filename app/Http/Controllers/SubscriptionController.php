@@ -65,6 +65,7 @@ class SubscriptionController extends Controller
     {
         $validated = $request->validate([
             'channel_id' => 'required|string',
+            'channel_title' => 'nullable|string',
         ]);
 
         $user = $request->user();
@@ -76,7 +77,8 @@ class SubscriptionController extends Controller
 
         $subscription = $this->subscriptionService->subscribeToYouTubeChannel(
             $user,
-            $validated['channel_id']
+            $validated['channel_id'],
+            $validated['channel_title'] ?? 'YouTube Channel'
         );
 
         if ($subscription) {
@@ -102,7 +104,7 @@ class SubscriptionController extends Controller
 
         $filter = $subscription->subscribable_type === 'youtube' ? 'youtube' : 'reddit';
 
-        if ($this->subscriptionService->unsubscribe($user, $subscription->getKey())) {
+        if ($subscription->delete()) {
             return redirect()->route('subscriptions.index', ['filter' => $filter])
                 ->with('status', 'subscription-removed');
         }
@@ -123,7 +125,7 @@ class SubscriptionController extends Controller
                 ->with('error', 'Unauthorized action.');
         }
 
-        $updatedSubscription = $this->subscriptionService->toggleFavorite($user, $subscription->getKey());
+        $updatedSubscription = $this->subscriptionService->toggleFavorite($subscription->getKey());
 
         if ($updatedSubscription) {
             $status = $updatedSubscription->is_favorite ? 'added-to-favorites' : 'removed-from-favorites';

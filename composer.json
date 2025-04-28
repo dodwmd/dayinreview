@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.10.1",
+        "orchid/platform": "^14.50",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
@@ -25,7 +26,9 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^11.5.3",
+        "psalm/plugin-laravel": "^3.0",
+        "vimeo/psalm": "^6.10"
     },
     "autoload": {
         "psr-4": {

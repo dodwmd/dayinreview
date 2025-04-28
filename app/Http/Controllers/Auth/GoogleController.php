@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
@@ -29,8 +30,14 @@ class GoogleController extends Controller
     public function handleGoogleCallback(Request $request): RedirectResponse
     {
         try {
+            /** @var SocialiteUser $googleUser */
             $googleUser = Socialite::driver('google')->user();
-            $token = $googleUser->accessTokenResponseBody['access_token'] ?? null;
+            /** @var array<string, mixed> $tokenData */
+            $tokenData = [];
+            if (method_exists($googleUser, 'getAccessTokenResponseBody')) {
+                $tokenData = $googleUser->getAccessTokenResponseBody() ?? [];
+            }
+            $token = $tokenData['access_token'] ?? null;
 
             // If user is authenticated, link their account with YouTube
             if (Auth::check()) {

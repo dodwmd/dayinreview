@@ -37,6 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/playlists/{id}', [PlaylistController::class, 'show'])->name('playlists.show');
     Route::patch('/playlists/{id}/visibility', [PlaylistController::class, 'updateVisibility'])->name('playlists.update-visibility');
     Route::post('/playlists/{id}/videos/{videoId}/watched', [PlaylistController::class, 'markWatched'])->name('playlists.mark-watched');
+
+    // Admin API routes
+    Route::post('/admin/api/playlist-items/{id}/toggle-watched', App\Http\Controllers\Admin\PlaylistItemController::class)
+        ->name('admin.api.playlist-items.toggle-watched');
 });
 
 require __DIR__.'/auth.php';

@@ -98,10 +98,10 @@ class PlaylistService
      */
     protected function getTrendingVideos(User $user): Collection
     {
-        // Get user's Reddit subscriptions (subreddits)
+        // Get user's Reddit subscriptions (subreddits) using a where clause instead of scope
         $subreddits = $user->subscriptions()
-            ->reddit()
-            ->pluck('subscribable_id')
+            ->where('source_type', 'App\\Models\\RedditSubreddit')
+            ->pluck('source_id')
             ->toArray();
 
         // If user has no Reddit subscriptions, get general trending videos
@@ -118,10 +118,10 @@ class PlaylistService
      */
     protected function getSubscriptionVideos(User $user): Collection
     {
-        // Get user's YouTube channel subscriptions
+        // Get user's YouTube channel subscriptions using a where clause instead of scope
         $channels = $user->subscriptions()
-            ->youtube()
-            ->pluck('subscribable_id')
+            ->where('source_type', 'App\\Models\\YouTubeChannel')
+            ->pluck('source_id')
             ->toArray();
 
         if (empty($channels) || empty($user->youtube_token)) {
@@ -211,15 +211,18 @@ class PlaylistService
             }
 
             // Find existing video or create a new one
-            $video = YoutubeVideo::firstOrNew(['youtube_id' => $videoId]);
+            /** @var YoutubeVideo $video */
+            $video = YoutubeVideo::query()->firstOrNew(['youtube_id' => $videoId]);
 
             // Update video data
-            $video->title = $videoData['title'] ?? '';
-            $video->description = $videoData['description'] ?? '';
-            $video->thumbnail_url = $videoData['thumbnail'] ?? null;
-            $video->channel_id = $videoData['channel_id'] ?? '';
-            $video->channel_title = $videoData['channel_title'] ?? '';
-            $video->duration_seconds = $videoData['duration_seconds'] ?? 0;
+            $video->fill([
+                'title' => $videoData['title'] ?? '',
+                'description' => $videoData['description'] ?? '',
+                'thumbnail_url' => $videoData['thumbnail'] ?? null,
+                'channel_id' => $videoData['channel_id'] ?? '',
+                'channel_title' => $videoData['channel_title'] ?? '',
+                'duration_seconds' => $videoData['duration_seconds'] ?? 0,
+            ]);
 
             // Save if new or changed
             if ($video->isDirty()) {

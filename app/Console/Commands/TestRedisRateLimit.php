@@ -24,7 +24,7 @@ class TestRedisRateLimit extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Testing Redis rate limiting functionality...');
 
@@ -58,7 +58,7 @@ class TestRedisRateLimit extends Command
             }
 
             // Small delay between attempts
-            if ($i < (int) $attemptCount) {
+            if ($i < $attemptCount) {
                 usleep(500000); // 0.5 seconds
             }
         }

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\YoutubeVideo;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -29,7 +30,7 @@ class ContentRepository
             return DB::table('reddit_posts')
                 ->join('youtube_videos', 'reddit_posts.youtube_video_id', '=', 'youtube_videos.id')
                 ->orderBy('reddit_posts.score', 'desc')
-                ->select('youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit')
+                ->select(['youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit'])
                 ->limit($limit)
                 ->get()
                 ->map(function ($video) {
@@ -55,7 +56,7 @@ class ContentRepository
                 ->join('youtube_videos', 'reddit_posts.youtube_video_id', '=', 'youtube_videos.id')
                 ->whereIn('reddit_posts.subreddit', $subreddits)
                 ->orderBy('reddit_posts.score', 'desc')
-                ->select('youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit')
+                ->select(['youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit'])
                 ->limit($limit)
                 ->get()
                 ->map(function ($video) {
@@ -65,7 +66,7 @@ class ContentRepository
     }
 
     /**
-     * Get videos based on a search query.
+     * Search for videos by title or description.
      *
      * @param  string  $query  Search query
      * @param  int  $limit  Maximum number of videos to return
@@ -76,39 +77,52 @@ class ContentRepository
         $cacheKey = 'search_videos_'.md5($query)."_{$limit}";
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($query, $limit) {
-            return YoutubeVideo::where('title', 'like', "%{$query}%")
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\YoutubeVideo> $videos */
+            $videos = YoutubeVideo::where('title', 'like', "%{$query}%")
                 ->orWhere('description', 'like', "%{$query}%")
                 ->orWhere('channel_title', 'like', "%{$query}%")
                 ->orderBy('view_count', 'desc')
                 ->limit($limit)
-                ->get()
-                ->map(function ($video) {
-                    return $this->formatModelData($video);
-                });
+                ->get();
+
+            // First get the videos as an array, then create a new collection
+            $formattedVideos = [];
+            foreach ($videos as $video) {
+                $formattedVideos[] = $this->formatModelData($video);
+            }
+
+            /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
+            return collect($formattedVideos);
         });
     }
 
     /**
-     * Get recent videos from a specific time period.
+     * Get recently added videos.
      *
-     * @param  int  $daysAgo  Number of days to look back
+     * @param  Carbon|null  $date  Date to start from
      * @param  int  $limit  Maximum number of videos to return
      * @return Collection Collection of recent videos
      */
-    public function getRecentVideos(int $daysAgo = 7, int $limit = 10): Collection
+    public function getRecentVideos(?Carbon $date = null, int $limit = 10): Collection
     {
-        $cacheKey = "recent_videos_{$daysAgo}_{$limit}";
+        $date ??= Carbon::now()->subDays(7);
+        $cacheKey = "recent_videos_{$date->format('Y-m-d')}_{$limit}";
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($daysAgo, $limit) {
-            $date = now()->subDays($daysAgo);
-
-            return YoutubeVideo::where('created_at', '>=', $date)
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($date, $limit) {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\YoutubeVideo> $videos */
+            $videos = YoutubeVideo::where('created_at', '>=', $date)
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
-                ->get()
-                ->map(function ($video) {
-                    return $this->formatModelData($video);
-                });
+                ->get();
+
+            // First get the videos as an array, then create a new collection
+            $formattedVideos = [];
+            foreach ($videos as $video) {
+                $formattedVideos[] = $this->formatModelData($video);
+            }
+
+            /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
+            return collect($formattedVideos);
         });
     }
 
@@ -128,7 +142,7 @@ class ContentRepository
                 ->join('youtube_videos', 'reddit_posts.youtube_video_id', '=', 'youtube_videos.id')
                 ->where('reddit_posts.subreddit', $subreddit)
                 ->orderBy('reddit_posts.score', 'desc')
-                ->select('youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit')
+                ->select(['youtube_videos.*', 'reddit_posts.score', 'reddit_posts.subreddit'])
                 ->limit($limit)
                 ->get()
                 ->map(function ($video) {

@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class RedditPost extends Model
 {
+    /** @use HasFactory<\Database\Factories\RedditPostFactory> */
     use HasFactory;
 
     /**

@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Playlist;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +18,18 @@ class PlaylistRepository
     const CACHE_TTL = 3600;
 
     /**
+     * Helper method to ensure we're using the Eloquent Builder.
+     */
+    protected function getEloquentBuilder(): \Illuminate\Database\Eloquent\Builder
+    {
+        // This ensures we're using the Eloquent builder and not Query builder
+        /** @var \Illuminate\Database\Eloquent\Builder $builder */
+        $builder = Playlist::query();
+
+        return $builder;
+    }
+
+    /**
      * Get a user's playlists with caching.
      */
     public function getUserPlaylists(User $user, int $limit = 10): Collection
@@ -25,11 +37,105 @@ class PlaylistRepository
         $cacheKey = "playlists:user:{$user->getKey()}:limit:{$limit}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $limit) {
-            return $user->playlists()
+            // First get the playlist IDs
+            $playlistIds = $user->playlists()->select('id')->limit($limit)->pluck('id')->toArray();
+
+            // Get playlists without relationships first
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
+            $playlists = Playlist::query()->whereIn('id', $playlistIds)
                 ->orderBy('created_at', 'desc')
-                ->limit($limit)
-                ->with('videos')
                 ->get();
+
+            // Then load relationships separately
+            if ($playlists->isNotEmpty()) {
+                $playlists->load('videos');
+            }
+
+            return $playlists;
+        });
+    }
+
+    /**
+     * Get a user's playlists with eager loaded items for optimized performance testing.
+     */
+    public function getUserPlaylistsWithItems(User $user, int $limit = 10): Collection
+    {
+        $cacheKey = "playlists:user:{$user->getKey()}:withItems:limit:{$limit}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $limit) {
+            // First get the playlist IDs
+            $playlistIds = $user->playlists()->select('id')->limit($limit)->pluck('id')->toArray();
+
+            // Get playlists without relationships first
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
+            $playlists = Playlist::query()->whereIn('id', $playlistIds)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Then load relationships separately
+            if ($playlists->isNotEmpty()) {
+                $playlists->load(['items', 'items.source']);
+            }
+
+            return $playlists;
+        });
+    }
+
+    /**
+     * Get playlists by IDs with caching.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist>
+     */
+    public function getPlaylistsWithVideos(array $playlistIds): \Illuminate\Database\Eloquent\Collection
+    {
+        if (empty($playlistIds)) {
+            return new \Illuminate\Database\Eloquent\Collection; // Return empty Eloquent collection
+        }
+
+        $cacheKey = 'playlists:'.md5(implode(',', $playlistIds));
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistIds) {
+            // Get playlists without relationships first
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
+            $playlists = Playlist::query()->whereIn('id', $playlistIds)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Then load relationships separately
+            if ($playlists->isNotEmpty()) {
+                $playlists->load('videos');
+            }
+
+            return $playlists;
+        });
+    }
+
+    /**
+     * Get playlists by IDs with items.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist>
+     */
+    public function getPlaylistsWithItems(array $playlistIds): \Illuminate\Database\Eloquent\Collection
+    {
+        if (empty($playlistIds)) {
+            return new \Illuminate\Database\Eloquent\Collection; // Return empty Eloquent collection
+        }
+
+        $cacheKey = 'playlists:items:'.md5(implode(',', $playlistIds));
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistIds) {
+            // Get playlists without relationships first
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
+            $playlists = Playlist::query()->whereIn('id', $playlistIds)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Then load relationships separately
+            if ($playlists->isNotEmpty()) {
+                $playlists->load(['items', 'items.source']);
+            }
+
+            return $playlists;
         });
     }
 
@@ -41,7 +147,28 @@ class PlaylistRepository
         $cacheKey = "playlist:{$playlistId}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistId) {
-            return Playlist::with(['videos', 'categories'])->find($playlistId);
+            $playlist = Playlist::query()->find($playlistId);
+
+            if ($playlist) {
+                $playlist->load(['videos', 'categories']);
+            }
+
+            return $playlist;
+        });
+    }
+
+    /**
+     * Get today's auto-generated playlist for a user.
+     */
+    public function getTodaysAutoPlaylist(User $user): ?Playlist
+    {
+        $dateString = now()->format('Y-m-d');
+        $cacheKey = "user:{$user->getKey()}:playlist:auto:today";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $dateString) {
+            $query = $user->playlists()->where('last_generated_at', 'like', $dateString.'%')->where('type', 'auto')->with('videos');
+
+            return $query->first();
         });
     }
 
@@ -54,11 +181,45 @@ class PlaylistRepository
         $cacheKey = "playlist:user:{$user->getKey()}:date:{$dateString}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $dateString) {
-            return $user->playlists()
-                ->where('last_generated_at', 'like', $dateString.'%')
-                ->where('type', 'auto')
-                ->with('videos')
-                ->first();
+            $query = $user->playlists()->where('last_generated_at', 'like', $dateString.'%')->where('type', 'auto')->with('videos');
+
+            return $query->first();
+        });
+    }
+
+    /**
+     * Get playlist by ID with eager loaded relationships.
+     */
+    public function getPlaylistWithRelationships(string $playlistId): ?Playlist
+    {
+        $cacheKey = "playlist:{$playlistId}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistId) {
+            $playlist = Playlist::query()->find($playlistId);
+
+            if ($playlist) {
+                $playlist->load(['videos', 'categories']);
+            }
+
+            return $playlist;
+        });
+    }
+
+    /**
+     * Get multiple playlists by IDs.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist>
+     */
+    public function getPlaylistsByIds(array $playlistIds): \Illuminate\Database\Eloquent\Collection
+    {
+        if (empty($playlistIds)) {
+            return Playlist::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent collection
+        }
+
+        $cacheKey = 'playlists:'.md5(implode(',', $playlistIds));
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistIds) {
+            return $this->getEloquentBuilder()->whereIn('id', $playlistIds)->get();
         });
     }
 
@@ -172,20 +333,21 @@ class PlaylistRepository
                 return collect();
             }
 
-            // Use a different approach to get playlists with relationships
-            $playlists = collect();
+            // Create an array to hold playlists, then convert to collection
+            $playlistsArray = [];
 
             // Fetch each playlist individually with relationships
             foreach ($playlistIds as $id) {
-                $playlist = (new Playlist)->newQuery()->find($id);
-                if ($playlist) {
+                $query = $this->getEloquentBuilder(); // Explicit Eloquent builder
+                $query = $query->find($id);
+                if ($query) {
                     // Load the relationships
-                    $playlist->load(['videos', 'user:id,name']);
-                    $playlists->push($playlist);
+                    $query->load(['videos', 'user:id,name']);
+                    $playlistsArray[] = $query;
                 }
             }
 
-            return $playlists;
+            return collect($playlistsArray);
         });
     }
 
@@ -205,6 +367,7 @@ class PlaylistRepository
         // Clear any cached user playlists with different limits
         for ($limit = 5; $limit <= 20; $limit += 5) {
             Cache::forget("playlists:user:{$userId}:limit:{$limit}");
+            Cache::forget("playlists:user:{$userId}:withItems:limit:{$limit}");
         }
     }
 }

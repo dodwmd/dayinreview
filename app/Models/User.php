@@ -2,34 +2,38 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Orchid\Filters\Types\Like;
+use Orchid\Filters\Types\Where;
+use Orchid\Filters\Types\WhereDateStartEnd;
+use Orchid\Platform\Models\User as Authenticatable;
 
 /**
- * @property string $id
+ * @property int $id
  * @property string $name
  * @property string $email
- * @property string|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
+ * @property string|null $remember_token
  * @property string|null $youtube_token
  * @property string|null $reddit_token
- * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property array $permissions
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Playlist[] $playlists
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Subscription[] $subscriptions
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|User where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereEmail($value)
  */
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasUuids, Notifiable;
-
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array
      */
     protected $fillable = [
         'name',
@@ -40,43 +44,67 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes excluded from the model's JSON form.
      *
-     * @var list<string>
+     * @var array
      */
     protected $hidden = [
         'password',
         'remember_token',
+        'permissions',
         'youtube_token',
         'reddit_token',
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
-     * @return array<string, string>
+     * @var array
      */
-    protected function casts(): array
+    protected $casts = [
+        'permissions' => 'array',
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
+     * The attributes for which you can use filters in url.
+     *
+     * @var array
+     */
+    protected $allowedFilters = [
+        'id' => Where::class,
+        'name' => Like::class,
+        'email' => Like::class,
+        'updated_at' => WhereDateStartEnd::class,
+        'created_at' => WhereDateStartEnd::class,
+    ];
+
+    /**
+     * The attributes for which can use sort in url.
+     *
+     * @var array
+     */
+    protected $allowedSorts = [
+        'id',
+        'name',
+        'email',
+        'updated_at',
+        'created_at',
+    ];
+
+    /**
+     * Get the playlists for the user.
+     */
+    public function playlists(): HasMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Playlist::class);
     }
 
     /**
      * Get the subscriptions for the user.
      */
-    public function subscriptions()
+    public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
-    }
-
-    /**
-     * Get the playlists for the user.
-     */
-    public function playlists()
-    {
-        return $this->hasMany(Playlist::class);
     }
 }

@@ -32,16 +32,21 @@ class DashboardController extends Controller
             'reddit' => $user->subscriptions()->reddit()->count(),
         ];
 
+        $playlistsData = [];
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $recentPlaylists */
+        /** @var \App\Models\Playlist $playlist */
+        foreach ($recentPlaylists as $playlist) {
+            $playlistsData[] = [
+                'id' => $playlist->id,
+                'name' => $playlist->name,
+                'thumbnail_url' => $playlist->thumbnail_url,
+                'video_count' => $playlist->videos->count(),
+                'created_at' => $playlist->created_at,
+            ];
+        }
+
         return Inertia::render('Dashboard', [
-            'recentPlaylists' => $recentPlaylists->map(function ($playlist) {
-                return [
-                    'id' => $playlist->id,
-                    'name' => $playlist->name,
-                    'thumbnail_url' => $playlist->thumbnail_url,
-                    'video_count' => $playlist->videos->count(),
-                    'created_at' => $playlist->created_at,
-                ];
-            }),
+            'recentPlaylists' => $playlistsData,
             'subscriptionStats' => $subscriptionStats,
             'youtubeConnected' => ! empty($user->youtube_token),
         ]);

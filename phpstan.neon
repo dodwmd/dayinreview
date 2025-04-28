@@ -7,8 +7,11 @@ parameters:
         - routes
     excludePaths:
         - vendor
-        - node_modules (?)
+        - node_modules
         - bootstrap/cache
-    ignoreErrors:
-        - '#Undefined variable: \$this#'
+        - app/Types/Stubs/Route.phpstub
+        - routes/auth.php
+        - routes/platform.php
+        - routes/web.php
+    treatPhpDocTypesAsCertain: false
     tmpDir: ./storage/framework/cache/phpstan

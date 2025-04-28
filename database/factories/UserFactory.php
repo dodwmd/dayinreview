@@ -21,13 +21,15 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function definition(): array
     {
         return [
+            // 'id' => (string) Str::uuid(), // Remove UUID for primary key - now using auto-increment
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => self::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
