@@ -15,6 +15,7 @@ class ProfilePasswordLayout extends Rows
      *
      * @return Field[]
      */
+    #[\Override]
     public function fields(): array
     {
         return [

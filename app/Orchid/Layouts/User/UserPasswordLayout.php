@@ -16,6 +16,7 @@ class UserPasswordLayout extends Rows
      *
      * @return Field[]
      */
+    #[\Override]
     public function fields(): array
     {
         /** @var User $user */

@@ -26,6 +26,7 @@ class RolePermissionLayout extends Rows
      *
      * @throws Throwable
      */
+    #[\Override]
     public function fields(): array
     {
         $this->user = $this->query->get('user');

@@ -33,7 +33,10 @@ class GoogleController extends Controller
             /** @var SocialiteUser $googleUser */
             $googleUser = Socialite::driver('google')->user();
             /** @var array<string, mixed> $tokenData */
-            $tokenData = $googleUser->accessTokenResponseBody ?? [];
+            $tokenData = [];
+            if (method_exists($googleUser, 'getAccessTokenResponseBody')) {
+                $tokenData = $googleUser->getAccessTokenResponseBody() ?? [];
+            }
             $token = $tokenData['access_token'] ?? null;
 
             // If user is authenticated, link their account with YouTube

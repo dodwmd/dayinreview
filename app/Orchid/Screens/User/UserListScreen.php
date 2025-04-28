@@ -34,6 +34,7 @@ class UserListScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'User Management';
@@ -42,11 +43,13 @@ class UserListScreen extends Screen
     /**
      * Display header description.
      */
+    #[\Override]
     public function description(): ?string
     {
         return 'A comprehensive list of all registered users, including their profiles and privileges.';
     }
 
+    #[\Override]
     public function permission(): ?iterable
     {
         return [
@@ -59,6 +62,7 @@ class UserListScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -73,6 +77,7 @@ class UserListScreen extends Screen
      *
      * @return string[]|\Orchid\Screen\Layout[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

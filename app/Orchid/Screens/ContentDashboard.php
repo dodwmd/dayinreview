@@ -67,6 +67,7 @@ class ContentDashboard extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'Content Dashboard';
@@ -77,6 +78,7 @@ class ContentDashboard extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -103,6 +105,7 @@ class ContentDashboard extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

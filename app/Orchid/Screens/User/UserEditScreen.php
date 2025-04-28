@@ -45,6 +45,7 @@ class UserEditScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return $this->user->exists ? 'Edit User' : 'Create User';
@@ -53,11 +54,13 @@ class UserEditScreen extends Screen
     /**
      * Display header description.
      */
+    #[\Override]
     public function description(): ?string
     {
         return 'User profile and privileges, including their associated role.';
     }
 
+    #[\Override]
     public function permission(): ?iterable
     {
         return [
@@ -70,6 +73,7 @@ class UserEditScreen extends Screen
      *
      * @return Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -94,6 +98,7 @@ class UserEditScreen extends Screen
     /**
      * @return \Orchid\Screen\Layout[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

@@ -36,6 +36,7 @@ class SubscriptionsScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'Subscriptions';
@@ -46,6 +47,7 @@ class SubscriptionsScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -65,6 +67,7 @@ class SubscriptionsScreen extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [
@@ -238,15 +241,19 @@ class SubscriptionsScreen extends Screen
     /**
      * Filter subscriptions based on request.
      */
-    public function filter(Request $request)
+    public function filter(Request $request): void
     {
         Toast::info('Subscriptions filtered');
     }
 
     /**
      * Load subscription data for edit modal.
+     *
+     * @return (array|bool|string)[][]
+     *
+     * @psalm-return array{subscription: array{id?: string, name?: string, is_favorite?: bool, categories?: array}}
      */
-    public function asyncGetSubscription(string $id)
+    public function asyncGetSubscription(string $id): array
     {
         $subscription = Subscription::query()->find($id);
 
@@ -269,7 +276,7 @@ class SubscriptionsScreen extends Screen
     /**
      * Create a new subscription.
      */
-    public function createSubscription(Request $request)
+    public function createSubscription(Request $request): void
     {
         $request->validate([
             'type' => 'required|in:youtube,reddit',
@@ -292,6 +299,8 @@ class SubscriptionsScreen extends Screen
 
     /**
      * Update an existing subscription.
+     *
+     * @return void
      */
     public function updateSubscription(Request $request, string $id)
     {
@@ -314,6 +323,8 @@ class SubscriptionsScreen extends Screen
 
     /**
      * Delete a subscription.
+     *
+     * @return void
      */
     public function deleteSubscription(string $id)
     {
@@ -331,6 +342,8 @@ class SubscriptionsScreen extends Screen
 
     /**
      * Toggle the favorite status of a subscription.
+     *
+     * @return void
      */
     public function toggleFavorite(string $id)
     {
@@ -351,7 +364,7 @@ class SubscriptionsScreen extends Screen
     /**
      * Sync subscriptions with external sources.
      */
-    public function syncSubscriptions()
+    public function syncSubscriptions(): void
     {
         // Logic to sync all subscriptions with YouTube and Reddit
         Toast::info('Subscription sync started');
@@ -359,6 +372,8 @@ class SubscriptionsScreen extends Screen
 
     /**
      * Refresh content for a specific subscription.
+     *
+     * @return void
      */
     public function refreshContent(string $id)
     {
@@ -376,6 +391,8 @@ class SubscriptionsScreen extends Screen
 
     /**
      * Manage categories for a subscription.
+     *
+     * @return void
      */
     public function manageCategories(string $id)
     {

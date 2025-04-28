@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class YoutubeChannel extends Model
 {
+    /**
+     * @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory>
+     */
     use HasFactory, HasUuids;
 
     /**

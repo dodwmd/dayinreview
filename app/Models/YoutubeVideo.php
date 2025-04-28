@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string $id
@@ -26,10 +25,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder where(string $column, string $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder join(string $table, string $first, string $operator = null, string $second = null)
  * @method static self firstOrNew(array $attributes, array $values = [])
+ *
+ * @psalm-suppress MissingTemplateParam
  */
 class YoutubeVideo extends Model
 {
-    /** @use HasFactory<\Database\Factories\YoutubeVideoFactory> */
     use HasFactory;
 
     /**
@@ -88,8 +88,12 @@ class YoutubeVideo extends Model
 
     /**
      * Get the Reddit post associated with this YouTube video.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\RedditPost>
+     *
+     * @psalm-suppress ParseError
      */
-    public function redditPost(): BelongsTo
+    public function redditPost()
     {
         return $this->belongsTo(RedditPost::class, 'reddit_post_id');
     }

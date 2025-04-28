@@ -19,11 +19,13 @@ class RoleFilter extends Filter
         'role',
     ];
 
+    #[\Override]
     public function name(): string
     {
         return __('Role');
     }
 
+    #[\Override]
     public function run(Builder $builder): Builder
     {
         return $builder->whereHas('roles', function (Builder $query) {
@@ -34,6 +36,7 @@ class RoleFilter extends Filter
     /**
      * @return Field[]
      */
+    #[\Override]
     public function display(): array
     {
         return [
@@ -45,6 +48,7 @@ class RoleFilter extends Filter
         ];
     }
 
+    #[\Override]
     public function value(): string
     {
         $role = Role::query()->where('slug', $this->request->get('role'))->first();

@@ -33,6 +33,7 @@ class RedditPostsScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'Reddit Posts';
@@ -43,6 +44,7 @@ class RedditPostsScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -57,6 +59,7 @@ class RedditPostsScreen extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [
@@ -139,11 +142,14 @@ class RedditPostsScreen extends Screen
         ];
     }
 
-    public function filter(Request $request)
+    public function filter(Request $request): void
     {
         Toast::info('Posts have been filtered');
     }
 
+    /**
+     * @return void
+     */
     public function viewDetails(string $id)
     {
         // Use query()->find() instead of findOrFail
@@ -158,6 +164,9 @@ class RedditPostsScreen extends Screen
         Toast::info("Viewing details for post: {$post->title}");
     }
 
+    /**
+     * @return void
+     */
     public function removePost(string $id)
     {
         // Use query()->find() instead of findOrFail
@@ -177,7 +186,7 @@ class RedditPostsScreen extends Screen
     /**
      * Refresh Reddit data
      */
-    public function refreshData()
+    public function refreshData(): void
     {
         // Here you would typically call your Reddit data fetch service
         // For example: App\Services\RedditService::fetchNewPosts();

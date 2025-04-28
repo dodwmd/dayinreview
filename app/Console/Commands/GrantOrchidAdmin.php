@@ -23,8 +23,10 @@ class GrantOrchidAdmin extends Command
 
     /**
      * Execute the console command.
+     *
+     * @psalm-return 0|1
      */
-    public function handle()
+    public function handle(): int
     {
         $email = $this->argument('email');
 

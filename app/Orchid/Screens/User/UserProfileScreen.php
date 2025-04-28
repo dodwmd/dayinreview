@@ -36,6 +36,7 @@ class UserProfileScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'My Account';
@@ -44,6 +45,7 @@ class UserProfileScreen extends Screen
     /**
      * Display header description.
      */
+    #[\Override]
     public function description(): ?string
     {
         return 'Update your account details such as name, email address and password';
@@ -54,6 +56,7 @@ class UserProfileScreen extends Screen
      *
      * @return Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -73,6 +76,7 @@ class UserProfileScreen extends Screen
     /**
      * @return \Orchid\Screen\Layout[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

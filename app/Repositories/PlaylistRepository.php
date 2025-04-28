@@ -41,7 +41,7 @@ class PlaylistRepository
             $playlistIds = $user->playlists()->select('id')->limit($limit)->pluck('id')->toArray();
 
             // Get playlists without relationships first
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Playlist> $playlists */
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
             $playlists = Playlist::query()->whereIn('id', $playlistIds)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -67,7 +67,7 @@ class PlaylistRepository
             $playlistIds = $user->playlists()->select('id')->limit($limit)->pluck('id')->toArray();
 
             // Get playlists without relationships first
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Playlist> $playlists */
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
             $playlists = Playlist::query()->whereIn('id', $playlistIds)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -96,7 +96,7 @@ class PlaylistRepository
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistIds) {
             // Get playlists without relationships first
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Playlist> $playlists */
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
             $playlists = Playlist::query()->whereIn('id', $playlistIds)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -125,7 +125,7 @@ class PlaylistRepository
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($playlistIds) {
             // Get playlists without relationships first
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Playlist> $playlists */
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists */
             $playlists = Playlist::query()->whereIn('id', $playlistIds)
                 ->orderBy('created_at', 'desc')
                 ->get();

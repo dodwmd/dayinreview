@@ -16,6 +16,7 @@ class YouTubeVideosTableLayout extends Table
     /**
      * @return TD[]
      */
+    #[\Override]
     public function columns(): array
     {
         return [

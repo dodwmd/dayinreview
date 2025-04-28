@@ -11,6 +11,7 @@ class UserFiltersLayout extends Selection
     /**
      * @return Filter[]
      */
+    #[\Override]
     public function filters(): array
     {
         return [

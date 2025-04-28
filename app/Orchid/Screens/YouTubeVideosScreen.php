@@ -36,6 +36,7 @@ class YouTubeVideosScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'YouTube Videos';
@@ -46,6 +47,7 @@ class YouTubeVideosScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -60,6 +62,7 @@ class YouTubeVideosScreen extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [
@@ -153,13 +156,15 @@ class YouTubeVideosScreen extends Screen
     /**
      * Filter videos based on request.
      */
-    public function filter(Request $request)
+    public function filter(Request $request): void
     {
         Toast::info('Videos filtered');
     }
 
     /**
      * View details for a video.
+     *
+     * @return void
      */
     public function viewDetails(string $id)
     {
@@ -176,6 +181,8 @@ class YouTubeVideosScreen extends Screen
 
     /**
      * Delete a video.
+     *
+     * @return void
      */
     public function deleteVideo(string $id)
     {
@@ -193,6 +200,8 @@ class YouTubeVideosScreen extends Screen
 
     /**
      * Add a video to a playlist.
+     *
+     * @return void
      */
     public function addToPlaylist(Request $request)
     {
@@ -231,7 +240,7 @@ class YouTubeVideosScreen extends Screen
     /**
      * Refresh YouTube data.
      */
-    public function refreshData()
+    public function refreshData(): void
     {
         Toast::info('YouTube data refresh has been scheduled');
     }

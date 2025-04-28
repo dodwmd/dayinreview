@@ -16,6 +16,7 @@ class RedditPostsTableLayout extends Table
     /**
      * @return TD[]
      */
+    #[\Override]
     public function columns(): array
     {
         return [

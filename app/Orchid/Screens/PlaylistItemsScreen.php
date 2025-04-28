@@ -51,6 +51,7 @@ class PlaylistItemsScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return $this->playlist->name.' - Videos';
@@ -59,6 +60,7 @@ class PlaylistItemsScreen extends Screen
     /**
      * The description is displayed on the user's screen under the heading
      */
+    #[\Override]
     public function description(): ?string
     {
         return 'Manage videos in this playlist';
@@ -69,6 +71,7 @@ class PlaylistItemsScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -96,6 +99,7 @@ class PlaylistItemsScreen extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

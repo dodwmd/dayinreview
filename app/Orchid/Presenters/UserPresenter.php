@@ -15,6 +15,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
     /**
      * Returns the label for this presenter, which is used in the UI to identify it.
      */
+    #[\Override]
     public function label(): string
     {
         return 'Users';
@@ -23,6 +24,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
     /**
      * Returns the title for this presenter, which is displayed in the UI as the main heading.
      */
+    #[\Override]
     public function title(): string
     {
         return $this->entity->name;
@@ -31,6 +33,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
     /**
      * Returns the subtitle for this presenter, which provides additional context about the user.
      */
+    #[\Override]
     public function subTitle(): string
     {
         $roles = $this->entity->roles->pluck('name')->implode(' / ');
@@ -43,6 +46,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
     /**
      * Returns the URL for this presenter, which is used to link to the user's edit page.
      */
+    #[\Override]
     public function url(): string
     {
         return route('platform.systems.users.edit', ['user' => $this->entity]);
@@ -51,6 +55,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
     /**
      * Returns the URL for the user's Gravatar image, or a default image if one is not found.
      */
+    #[\Override]
     public function image(): ?string
     {
         $hash = md5(strtolower(trim($this->entity->email)));
@@ -64,6 +69,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
      * Returns the number of models to return for a compact search result.
      * This method is used by the search functionality to display a list of matching results.
      */
+    #[\Override]
     public function perSearchShow(): int
     {
         return 3;
@@ -73,6 +79,7 @@ class UserPresenter extends Presenter implements Personable, Searchable
      * Returns a Laravel Scout builder object that can be used to search for matching users.
      * This method is used by the search functionality to retrieve a list of matching results.
      */
+    #[\Override]
     public function searchQuery(?string $query = null): Builder
     {
         return $this->entity->search($query);

@@ -38,6 +38,7 @@ class RoleEditScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'Edit Role';
@@ -46,6 +47,7 @@ class RoleEditScreen extends Screen
     /**
      * Display header description.
      */
+    #[\Override]
     public function description(): ?string
     {
         return 'Modify the privileges and permissions associated with a specific role.';
@@ -54,6 +56,7 @@ class RoleEditScreen extends Screen
     /**
      * The permissions required to access this screen.
      */
+    #[\Override]
     public function permission(): ?iterable
     {
         return [
@@ -66,6 +69,7 @@ class RoleEditScreen extends Screen
      *
      * @return Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -85,6 +89,7 @@ class RoleEditScreen extends Screen
      *
      * @return string[]|\Orchid\Screen\Layout[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [

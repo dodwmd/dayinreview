@@ -40,6 +40,7 @@ class PlaylistsScreen extends Screen
     /**
      * The name of the screen displayed in the header.
      */
+    #[\Override]
     public function name(): ?string
     {
         return 'Playlists';
@@ -50,6 +51,7 @@ class PlaylistsScreen extends Screen
      *
      * @return \Orchid\Screen\Action[]
      */
+    #[\Override]
     public function commandBar(): iterable
     {
         return [
@@ -69,6 +71,7 @@ class PlaylistsScreen extends Screen
      *
      * @return \Orchid\Screen\Layout[]|string[]
      */
+    #[\Override]
     public function layout(): iterable
     {
         return [
@@ -249,8 +252,12 @@ class PlaylistsScreen extends Screen
 
     /**
      * Load playlist data for the edit modal.
+     *
+     * @return (array|bool|null|string)[][]
+     *
+     * @psalm-return array{playlist: array{id?: string, name?: string, description?: null|string, visibility?: bool, categories?: array}}
      */
-    public function asyncGetPlaylist(string $id)
+    public function asyncGetPlaylist(string $id): array
     {
         $playlist = Playlist::query()->find($id);
 
@@ -274,7 +281,7 @@ class PlaylistsScreen extends Screen
     /**
      * Create a new playlist.
      */
-    public function createPlaylist(Request $request)
+    public function createPlaylist(Request $request): void
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -299,6 +306,8 @@ class PlaylistsScreen extends Screen
 
     /**
      * Update an existing playlist.
+     *
+     * @return void
      */
     public function updatePlaylist(Request $request, string $id)
     {
@@ -321,6 +330,8 @@ class PlaylistsScreen extends Screen
 
     /**
      * Delete a playlist.
+     *
+     * @return void
      */
     public function deletePlaylist(string $id)
     {
@@ -338,6 +349,8 @@ class PlaylistsScreen extends Screen
 
     /**
      * Manage playlist categories.
+     *
+     * @return void
      */
     public function manageCategories(string $id)
     {
@@ -355,6 +368,8 @@ class PlaylistsScreen extends Screen
 
     /**
      * Regenerate auto playlist items.
+     *
+     * @return void
      */
     public function regeneratePlaylist(string $id)
     {
@@ -373,7 +388,7 @@ class PlaylistsScreen extends Screen
     /**
      * Generate auto playlists for all users.
      */
-    public function generateAutoPlaylists()
+    public function generateAutoPlaylists(): void
     {
         // Logic to generate auto playlists
         Toast::info('Auto playlist generation scheduled for all users');
@@ -382,7 +397,7 @@ class PlaylistsScreen extends Screen
     /**
      * Filter playlists based on request.
      */
-    public function filter()
+    public function filter(): void
     {
         Toast::info('Filter applied');
     }

@@ -14,6 +14,7 @@ class PlatformProvider extends OrchidServiceProvider
     /**
      * Bootstrap the application services.
      */
+    #[\Override]
     public function boot(Dashboard $dashboard): void
     {
         parent::boot($dashboard);
@@ -26,6 +27,7 @@ class PlatformProvider extends OrchidServiceProvider
      *
      * @return Menu[]
      */
+    #[\Override]
     public function menu(): array
     {
         return [
@@ -85,6 +87,7 @@ class PlatformProvider extends OrchidServiceProvider
      *
      * @return ItemPermission[]
      */
+    #[\Override]
     public function permissions(): array
     {
         return [
