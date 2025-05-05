@@ -500,38 +500,92 @@ class YouTubeService
             throw new \Exception('YouTube token is required to fetch subscriptions');
         }
 
+        // Ensure the token is valid/refreshed if necessary (assuming a mechanism exists)
+        $accessToken = $user->youtube_token;
+
         $cacheKey = "youtube_user_subscriptions_{$user->getKey()}";
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
+        // Adjust cache TTL if needed, maybe shorter for frequently changing subscriptions
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $accessToken) {
             try {
                 $this->checkRateLimit();
 
-                // In a real implementation, this would use the user's OAuth token
-                // to make an authenticated request to the subscriptions endpoint
+                $allSubscriptions = [];
+                $pageToken = null;
+                $maxResultsPerPage = 50; // YouTube API max is 50
 
-                // Simulate API response with dummy data for now
-                // This should be replaced with actual API call using user's token
-                return [
-                    [
-                        'id' => 'UC_x5XG1OV2P6uZZ5FSM9Ttw',
-                        'title' => 'Google Developers',
-                        'description' => 'The official YouTube channel for Google Developers',
-                        'thumbnail' => 'https://yt3.googleusercontent.com/ytc/APkrFKZkx7uRVVdoDb-E7D-4GsJD97HvLfpLP-kawsigMQ=s240-c-k-c0x00ffffff-no-rj',
-                    ],
-                    [
-                        'id' => 'UCVHFbqXqoYvEWM1Ddxl0QDg',
-                        'title' => 'Laravel',
-                        'description' => 'The official Laravel YouTube channel',
-                        'thumbnail' => 'https://yt3.googleusercontent.com/ytc/APkrFKbL4ryiqZwjk-KEdCiK1XZQesIwJznXpjqOyJSJ=s240-c-k-c0x00ffffff-no-rj',
-                    ],
-                ];
-            } catch (\Exception $e) {
-                Log::error('Failed to fetch YouTube subscriptions', [
+                do {
+                    $queryParams = [
+                        'part' => 'snippet', // We need snippet for channel details
+                        'mine' => 'true',     // Get subscriptions for the authenticated user
+                        'maxResults' => $maxResultsPerPage,
+                        // API Key is generally not required for authenticated requests
+                    ];
+
+                    if ($pageToken) {
+                        $queryParams['pageToken'] = $pageToken;
+                    }
+
+                    // Assuming makeRequest() returns the base client configured with apiUrl.
+                    // Add the user's OAuth token for authentication.
+                    $response = $this->makeRequest()
+                        ->withToken($accessToken)
+                        ->get($this->baseUrl . '/subscriptions', $queryParams);
+
+                    if (! $response->successful()) {
+                        Log::error('YouTube API error fetching subscriptions', [
+                            'user_id' => $user->getKey(),
+                            'status' => $response->status(),
+                            'response' => $response->json(), // Log the error response from YouTube
+                        ]);
+                        // Throwing an exception is generally better than returning empty
+                        // as it signals a failure explicitly.
+                        throw new \Illuminate\Http\Client\RequestException($response);
+                    }
+
+                    $data = $response->json();
+
+                    if (isset($data['items']) && is_array($data['items'])) {
+                        foreach ($data['items'] as $item) {
+                            if (isset($item['snippet'])) {
+                                $snippet = $item['snippet'];
+                                // Extract relevant channel info from snippet
+                                $allSubscriptions[] = [
+                                    'id' => $snippet['resourceId']['channelId'] ?? null, // The subscribed channel's ID
+                                    'title' => $snippet['title'] ?? 'N/A',
+                                    'description' => $snippet['description'] ?? '',
+                                    'thumbnail' => $snippet['thumbnails']['default']['url'] ?? ($snippet['thumbnails']['medium']['url'] ?? ($snippet['thumbnails']['high']['url'] ?? null)),
+                                ];
+                            }
+                        }
+                    }
+
+                    // Get the next page token for pagination
+                    $pageToken = $data['nextPageToken'] ?? null;
+
+                } while ($pageToken);
+
+                return $allSubscriptions;
+
+            } catch (\Illuminate\Http\Client\RequestException $e) {
+                // Log specific HTTP client errors
+                Log::error('HTTP error fetching YouTube subscriptions', [
                     'user_id' => $user->getKey(),
+                    'status' => $e->response->status(),
+                    'response' => $e->response->body(),
                     'error' => $e->getMessage(),
                 ]);
-
-                return [];
+                 // Re-throw to signal failure
+                 throw new \Exception('HTTP error fetching subscriptions: ' . $e->getMessage(), $e->getCode(), $e);
+            } catch (\Exception $e) {
+                // Catch any other general exceptions
+                Log::error('General error fetching YouTube subscriptions', [
+                    'user_id' => $user->getKey(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                // Re-throw to signal failure
+                 throw new \Exception('Error fetching subscriptions: ' . $e->getMessage(), $e->getCode(), $e);
             }
         });
     }

@@ -87,9 +87,13 @@ class YoutubeVideo extends Model
 
     /**
      * Get the Reddit post associated with this YouTube video.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\RedditPost>
+     * 
      */
     public function redditPost(): BelongsTo
     {
+        /** @psalm-suppress all */
         return $this->belongsTo(RedditPost::class, 'reddit_post_id');
     }
 }

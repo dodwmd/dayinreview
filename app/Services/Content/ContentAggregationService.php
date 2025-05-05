@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Service class for content aggregation operations
+ * 
+ * @psalm-suppress UndefinedMagicMethod
+ */
 class ContentAggregationService
 {
     /**

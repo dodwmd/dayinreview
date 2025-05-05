@@ -191,7 +191,8 @@ class ContentRepository
         try {
             foreach ($videos as $videoData) {
                 $video = YoutubeVideo::firstOrNew(['youtube_id' => $videoData['id']]);
-
+                
+                /** @var \App\Models\YoutubeVideo $video */
                 $video->title = $videoData['title'] ?? '';
                 $video->description = $videoData['description'] ?? '';
                 $video->thumbnail_url = $videoData['thumbnail'] ?? null;
